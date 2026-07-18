@@ -176,54 +176,41 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
   useEffect(() => {
     let unsubscribeStatus: (() => void) | null = null;
     let unsubscribeLocation: (() => void) | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
     if (params.pickupCoords) {
       setCarCoord(params.pickupCoords);
     }
 
+    const processStatus = (statusStr: string) => {
+      const status = (statusStr || '').toUpperCase();
+      if (status === 'ACCEPTED' || status === 'ARRIVING') {
+        setRideStage('arriving');
+      } else if (status === 'IN_PROGRESS') {
+        setRideStage('inProgress');
+      } else if (status === 'COMPLETED') {
+        setRideStage('completed');
+      }
+    };
+
     // Subscribe to status changes
     unsubscribeStatus = useSocketStore.getState().subscribe('RIDE_STATUS_UPDATE', (payload) => {
       const rideData = payload.data;
-      if (rideData && rideData.id === params.rideId) {
+      if (rideData && String(rideData.id) === String(params.rideId)) {
         console.log('RideInProgressScreen received status update:', rideData.status);
-        if (rideData.status === 'ACCEPTED' || rideData.status === 'ARRIVING') {
-          if (rideStage !== 'arriving') {
-            scheduleLocalNotification(
-              'Driver Arriving',
-              `${params.driverName || 'Kwame Asante'} has arrived at your pickup location.`,
-              { rideId: params.rideId, status: 'ARRIVING' }
-            );
-          }
-          setRideStage('arriving');
-        } else if (rideData.status === 'IN_PROGRESS') {
-          if (rideStage !== 'inProgress') {
-            scheduleLocalNotification(
-              'Trip in Progress',
-              'Your GoRide has started. Have a safe journey!',
-              { rideId: params.rideId, status: 'IN_PROGRESS' }
-            );
-          }
-          setRideStage('inProgress');
-        } else if (rideData.status === 'COMPLETED') {
-          scheduleLocalNotification(
-            'Trip Completed',
-            `You have arrived at your destination! GH₵${params.price || '15.00'} has been deducted.`,
-            { rideId: params.rideId, status: 'COMPLETED' }
-          );
-          setRideStage('completed');
-        }
+        processStatus(rideData.status);
       }
     });
 
     // Subscribe to driver location coordinate updates
     unsubscribeLocation = useSocketStore.getState().subscribe('DRIVER_LOCATION_UPDATE', (payload) => {
-      if (payload.rideId === params.rideId) {
+      if (String(payload.rideId) === String(params.rideId)) {
         console.log('RideInProgressScreen received driver coordinate update:', payload.latitude, payload.longitude);
         setCarCoord({ latitude: payload.latitude, longitude: payload.longitude });
       }
     });
 
-    // Offline mock fallback mode loop
+    // Offline mock fallback mode loop or Backend HTTP polling backup
     let fallbackTimer1: NodeJS.Timeout;
     let fallbackTimer2: NodeJS.Timeout;
     let fallbackAnimFrame: number;
@@ -264,6 +251,21 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
         }
       };
       animateFallback();
+    } else {
+      // Backend HTTP polling backup every 2.5s
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/rides/${params.rideId}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data && json.data.status) {
+              processStatus(json.data.status);
+            }
+          }
+        } catch (err) {
+          // Silent fallback
+        }
+      }, 2500);
     }
 
     return () => {
@@ -272,8 +274,9 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
       if (fallbackTimer1) clearTimeout(fallbackTimer1);
       if (fallbackTimer2) clearTimeout(fallbackTimer2);
       if (fallbackAnimFrame) cancelAnimationFrame(fallbackAnimFrame);
+      if (pollInterval) clearInterval(pollInterval);
     };
-  }, []);
+  }, [params.rideId]);
 
   const stage = STAGES[rideStage];
   const isCompleted = rideStage === 'completed';

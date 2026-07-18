@@ -128,6 +128,8 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
     let unsubscribe: (() => void) | null = null;
     let isMounted = true;
 
+    let pollInterval: NodeJS.Timeout | null = null;
+
     // Connect to WebSocket room updates
     unsubscribe = useSocketStore.getState().subscribe('RIDE_STATUS_UPDATE', (payload) => {
       const rideData = payload.data;
@@ -135,6 +137,7 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
       
       if (isMounted && rideData && (rideData.status === 'ACCEPTED' || rideData.status === 'ARRIVING' || rideData.status === 'IN_PROGRESS')) {
         if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        if (pollInterval) clearInterval(pollInterval);
         
         // Dispatch local OS push banner
         scheduleLocalNotification(
