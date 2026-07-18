@@ -110,11 +110,16 @@ public class OrderService {
     }
 
     /**
-     * Get user's order history
+     * Get user's order history with optional status filter
      */
-    public List<OrderResponse> getUserOrders(Long userId) {
-        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
+    public List<OrderResponse> getUserOrders(Long userId, Order.OrderStatus status) {
+        List<Order> orders;
+        if (status != null) {
+            orders = orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, status);
+        } else {
+            orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        }
+        return orders.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

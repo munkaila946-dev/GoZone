@@ -39,12 +39,15 @@ public class OrderController {
 
     /**
      * Get user's order history
-     * GET /api/orders
+     * GET /api/orders?status=DELIVERED
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getUserOrders(Authentication authentication) {
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getUserOrders(
+            Authentication authentication,
+            @RequestParam(required = false) Order.OrderStatus status
+    ) {
         Long userId = (Long) authentication.getPrincipal();
-        List<OrderResponse> response = orderService.getUserOrders(userId);
+        List<OrderResponse> response = orderService.getUserOrders(userId, status);
         return ResponseEntity.ok(
                 ApiResponse.success("Order history retrieved", response)
         );

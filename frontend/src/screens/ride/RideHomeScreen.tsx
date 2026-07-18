@@ -26,12 +26,13 @@ import type { TabScreenProps } from '@navigation/types';
 import { API_BASE_URL } from '@services/apiConfig';
 
 const RIDE_OPTIONS = [
-  { id: '1', type: 'GoPool', desc: 'Share ride', price: 15, eta: 8, icon: 'car-multiple', seats: '1-2' },
-  { id: '2', type: 'Standard', desc: 'Affordable', price: 25, eta: 3, icon: 'car-hatchback', seats: '4' },
-  { id: '3', type: 'Premium', desc: 'Luxury', price: 40, eta: 5, icon: 'car-sports', seats: '4' },
+  { id: '1', type: 'GoPool', desc: 'Save 30%', price: 15, eta: 6, icon: 'car-multiple', iconSet: 'material', seats: '1-2' },
+  { id: '2', type: 'GoStandard', desc: 'Affordable', price: 25, eta: 3, icon: 'car-hatchback', iconSet: 'material', seats: '4' },
+  { id: '3', type: 'GoComfort', desc: 'Extra A/C', price: 35, eta: 5, icon: 'car-sports', iconSet: 'material', seats: '4' },
+  { id: '4', type: 'GoBiker', desc: 'Beat traffic', price: 12, eta: 2, icon: 'motorbike', iconSet: 'material', seats: '1' },
 ] as const;
 
-// Custom dark map styling representing premium Dark mode maps (Template 2)
+// Custom dark map styling for dark mode themes
 const DARK_MAP_STYLE = [
   { "elementType": "geometry", "stylers": [{ "color": "#1A1A2E" }] },
   { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
@@ -53,6 +54,21 @@ const DARK_MAP_STYLE = [
   { "featureType": "transit", "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
   { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#0D0D1A" }] },
   { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#3d3d3d" }] }
+];
+
+// Custom light map styling for light mode themes
+const LIGHT_MAP_STYLE = [
+  { "elementType": "geometry", "stylers": [{ "color": "#F8F9FA" }] },
+  { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+  { "elementType": "labels.text.fill", "stylers": [{ "color": "#616161" }] },
+  { "elementType": "labels.text.stroke", "stylers": [{ "color": "#FFFFFF" }] },
+  { "featureType": "administrative.land_parcel", "elementType": "labels.text.fill", "stylers": [{ "color": "#bdbdbd" }] },
+  { "featureType": "poi", "elementType": "geometry", "stylers": [{ "color": "#EEEEEE" }] },
+  { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "color": "#E8F5E9" }] },
+  { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#FFFFFF" }] },
+  { "featureType": "road.arterial", "elementType": "geometry", "stylers": [{ "color": "#FFFFFF" }] },
+  { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#FFE0B2" }] },
+  { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#E0F7FA" }] }
 ];
 
 const GHANA_PLACES = [
@@ -539,14 +555,16 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
     return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
   };
 
-  const handleSearch = async (text: string, field: 'pickup' | 'destination') => {
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearch = (text: string, field: 'pickup' | 'destination') => {
     if (field === 'pickup') {
       setPickup(text);
     } else {
       setDestination(text);
     }
 
-    // Sort places by distance to the user's current coordinates
+    // Sort places by distance to reference coordinates
     let sortedPlaces = [...places];
     const refCoords = pickupCoords || { latitude: region.latitude, longitude: region.longitude };
     if (refCoords) {
@@ -558,39 +576,45 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
     }
 
     if (!text.trim()) {
-      // If search text is empty, show the closest 5 places as suggestions
       setSuggestions(sortedPlaces.slice(0, 5));
       return;
     }
 
-    // Filter local list of popular places
+    // Instant local matching on every keystroke
+    const query = text.toLowerCase().trim();
     const localFiltered = sortedPlaces.filter(place =>
-      place.name.toLowerCase().includes(text.toLowerCase())
+      place.name.toLowerCase().includes(query)
     );
 
     setSuggestions(localFiltered.slice(0, 8));
 
-    // Scoped Geocoding if text length > 3
+    // Debounced background geocoding for extra online suggestions
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
     if (text.length > 3) {
-      try {
-        const geocoded = await Location.geocodeAsync(`${text}, Ghana`);
-        if (geocoded && geocoded.length > 0) {
-          const combined = [...localFiltered];
-          geocoded.forEach((g, idx) => {
-            const formattedName = `${text.charAt(0).toUpperCase() + text.slice(1)}${idx > 0 ? ' ' + (idx + 1) : ''}, Ghana`;
-            if (!combined.some(c => Math.abs(c.latitude - g.latitude) < 0.001 && Math.abs(c.longitude - g.longitude) < 0.001)) {
-              combined.push({
-                name: formattedName,
-                latitude: g.latitude,
-                longitude: g.longitude,
-              });
-            }
-          });
-          setSuggestions(combined.slice(0, 8));
+      searchDebounceRef.current = setTimeout(async () => {
+        try {
+          const geocoded = await Location.geocodeAsync(`${text}, Ghana`);
+          if (geocoded && geocoded.length > 0) {
+            const combined = [...localFiltered];
+            geocoded.forEach((g, idx) => {
+              const formattedName = `${text.charAt(0).toUpperCase() + text.slice(1)}${idx > 0 ? ' ' + (idx + 1) : ''}, Ghana`;
+              if (!combined.some(c => Math.abs(c.latitude - g.latitude) < 0.001 && Math.abs(c.longitude - g.longitude) < 0.001)) {
+                combined.push({
+                  name: formattedName,
+                  latitude: g.latitude,
+                  longitude: g.longitude,
+                });
+              }
+            });
+            setSuggestions(combined.slice(0, 8));
+          }
+        } catch (err) {
+          // Fallback silently
         }
-      } catch (err) {
-        // Fallback
-      }
+      }, 300);
     }
   };
 
@@ -698,7 +722,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             ref={mapRef}
             provider={PROVIDER_GOOGLE}
             style={StyleSheet.absoluteFillObject}
-            customMapStyle={isDark ? DARK_MAP_STYLE : undefined}
+            customMapStyle={isDark ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
             region={region}
             onRegionChangeComplete={setRegion}
             showsUserLocation={true}
@@ -883,17 +907,32 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             {/* Conditional Content: If searching, show suggestions. Else show chips + options */}
             {activeField && suggestions.length > 0 ? (
               <View style={styles.suggestionsContainer}>
-                {suggestions.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
-                    onPress={() => handleSelectSuggestion(item)}
-                    activeOpacity={0.7}
-                  >
-                    <Icon name="map-pin" set="feather" size={14} color={colors.primary} style={{ marginRight: 10 }} />
-                    <Text style={[styles.suggestionText, { color: colors.textPrimary }]}>{item.name}</Text>
-                  </TouchableOpacity>
-                ))}
+                {suggestions.map((item, index) => {
+                  const parts = item.name.split(',');
+                  const mainName = parts[0].trim();
+                  const subDetail = parts.slice(1).join(',').trim() || 'Accra, Ghana';
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[styles.suggestionCard, { borderBottomColor: colors.border }]}
+                      onPress={() => handleSelectSuggestion(item)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.suggestionIconWrap, { backgroundColor: colors.primaryLight }]}>
+                        <Icon name="map-pin" set="feather" size={14} color={colors.primary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.suggestionTitleText, { color: colors.textPrimary }]} numberOfLines={1}>
+                          {mainName}
+                        </Text>
+                        <Text style={[styles.suggestionSubText, { color: colors.textTertiary }]} numberOfLines={1}>
+                          {subDetail}
+                        </Text>
+                      </View>
+                      <Icon name="arrow-up-left" set="feather" size={14} color={colors.textTertiary} />
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             ) : (
               <>
@@ -1175,16 +1214,28 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
   },
-  suggestionItem: {
+  suggestionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.sm,
     borderBottomWidth: 1,
+    gap: 12,
   },
-  suggestionText: {
+  suggestionIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  suggestionTitleText: {
     fontSize: typography.size.sm,
-    fontWeight: '500',
+    fontWeight: '700',
+  },
+  suggestionSubText: {
+    fontSize: 11,
+    marginTop: 2,
   },
   // Custom markers styling
   customDestMarker: { alignItems: 'center', justifyContent: 'center' },

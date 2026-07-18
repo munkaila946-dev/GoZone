@@ -804,17 +804,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation, onLogo
             </Animated.View>
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Profile</Text>
-          <TouchableOpacity
-            onPressIn={() => animateScale(settingsBtnScale, 0.9)}
-            onPressOut={() => animateScale(settingsBtnScale, 1)}
-            style={[styles.iconBtn, { backgroundColor: colors.surface }]}
-            onPress={() => handleMenuPress('Personal Information')}
-            activeOpacity={0.9}
-          >
-            <Animated.View style={{ transform: [{ scale: settingsBtnScale }] }}>
-              <Icon name="settings" set="feather" size={18} color={colors.textPrimary} />
-            </Animated.View>
-          </TouchableOpacity>
+          <View style={{ width: 40 }} />
         </View>
 
         {/* ===== Profile Header ===== */}

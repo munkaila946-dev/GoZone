@@ -200,6 +200,58 @@ public class WalletService {
     }
 
     /**
+     * Withdraw funds from wallet to Mobile Money / Bank account
+     */
+    @Transactional
+    public Transaction withdraw(Long userId, Double amount, String destination, String description) {
+        if (amount <= 0) {
+            throw new RuntimeException("Withdrawal amount must be greater than 0");
+        }
+
+        Wallet wallet = getWallet(userId);
+
+        if (wallet.getBalance() < amount) {
+            throw new RuntimeException("Insufficient wallet balance for withdrawal");
+        }
+
+        // Deduct balance
+        wallet.setBalance(wallet.getBalance() - amount);
+        walletRepository.save(wallet);
+
+        String desc = (description != null && !description.isBlank()) 
+            ? description 
+            : ("Withdrawal to " + (destination != null ? destination : "Mobile Money"));
+
+        // Record withdrawal transaction (DEBIT)
+        Transaction txn = Transaction.builder()
+                .wallet(wallet)
+                .type(Transaction.TransactionType.DEBIT)
+                .category(Transaction.TransactionCategory.WITHDRAWAL)
+                .amount(amount)
+                .description(desc)
+                .reference("WD_" + System.currentTimeMillis())
+                .status(Transaction.TransactionStatus.COMPLETED)
+                .build();
+
+        Transaction savedTxn = transactionRepository.save(txn);
+
+        // Send push notification
+        if (wallet.getUser() != null) {
+            String pushToken = wallet.getUser().getPushToken();
+            if (pushToken != null) {
+                notificationService.sendPushNotification(
+                        pushToken,
+                        "SuperWallet Withdrawal",
+                        "GH₵" + String.format("%.2f", amount) + " withdrawn to " + (destination != null ? destination : "Mobile Money") + ".",
+                        java.util.Map.of("category", "wallet", "amount", amount)
+                );
+            }
+        }
+
+        return savedTxn;
+    }
+
+    /**
      * Get transaction history
      */
     public List<Transaction> getTransactions(Long userId) {

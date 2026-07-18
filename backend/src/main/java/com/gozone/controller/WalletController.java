@@ -156,4 +156,25 @@ public class WalletController {
                 ApiResponse.success("Transfer successful!", txn)
         );
     }
+
+    /**
+     * Withdraw money to Mobile Money or Bank Account
+     * POST /api/wallet/withdraw
+     * Body: { "amount": 100, "destination": "MTN MoMo (+233 24 123 4567)", "description": "Withdrawal to MTN MoMo" }
+     */
+    @PostMapping("/withdraw")
+    public ResponseEntity<ApiResponse<Transaction>> withdraw(
+            Authentication authentication,
+            @RequestBody Map<String, Object> body
+    ) {
+        Long userId = (Long) authentication.getPrincipal();
+        Double amount = ((Number) body.get("amount")).doubleValue();
+        String destination = (String) body.get("destination");
+        String description = (String) body.get("description");
+
+        Transaction txn = walletService.withdraw(userId, amount, destination, description);
+        return ResponseEntity.ok(
+                ApiResponse.success("Withdrawal successful!", txn)
+        );
+    }
 }

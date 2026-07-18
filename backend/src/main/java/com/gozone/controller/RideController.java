@@ -22,6 +22,23 @@ public class RideController {
     }
 
     /**
+     * Get fare estimate options for all ride types
+     * POST /api/rides/estimate
+     */
+    @PostMapping("/estimate")
+    public ResponseEntity<ApiResponse<List<FareEstimateOption>>> estimateFares(
+            @RequestBody FareEstimateRequest request
+    ) {
+        List<FareEstimateOption> options = rideService.estimateFares(
+                request.getDistanceKm(), 
+                request.getEstimatedDurationMin()
+        );
+        return ResponseEntity.ok(
+                ApiResponse.success("Fare estimates calculated", options)
+        );
+    }
+
+    /**
      * Book a ride
      * POST /api/rides
      */

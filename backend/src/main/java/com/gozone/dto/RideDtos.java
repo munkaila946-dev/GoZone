@@ -49,4 +49,25 @@ public class RideDtos {
         private LocalDateTime pickedUpAt;
         private LocalDateTime completedAt;
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FareEstimateRequest {
+        private Double distanceKm;
+        private Integer estimatedDurationMin;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FareEstimateOption {
+        private Ride.RideType rideType;
+        private String name;
+        private Double fare;
+        private Integer etaMin;
+        private String description;
+    }
 }

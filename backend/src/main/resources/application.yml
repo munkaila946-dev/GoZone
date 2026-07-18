@@ -21,8 +21,7 @@ spring:
   jpa:
     hibernate:
       # Automatically create/update database tables based on entities
-      #ddl-auto: update          # Safe — only updates, never drops
-      ddl-auto: create-drop       # Use during development (recreates on restart)
+      ddl-auto: update          # Safe — only updates, never drops tables or registered users
     show-sql: true              # Print SQL queries to console (for debugging)
     properties:
       hibernate:

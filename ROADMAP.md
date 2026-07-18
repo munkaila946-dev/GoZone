@@ -40,26 +40,26 @@ GoZone is a super-app with three integrated service pillars:
 - [x] **Top-up screen** (MoMo/card selection, quick amounts)
 - [x] **Transactions screen** (Filter tabs, grouped by date, summaries)
 - [x] **Send money screen** (Contacts, amount, note, summary)
-- [ ] **Register & OTP screens**
+- [x] **Register & OTP screens**
 
-### ⚙️ Phase 2: Backend Foundation (IN PROGRESS)
+### ⚙️ Phase 2: Backend Foundation (COMPLETED)
 - [x] Spring Boot project setup (pom.xml, structure, config)
 - [x] PostgreSQL database design & schema (9 tables)
 - [x] Entity classes (User, Wallet, Transaction, Restaurant, MenuItem, Order, OrderItem, Ride, SavedLocation)
 - [x] Repository layer (Spring Data JPA)
 - [x] Authentication (JWT) + user management
-- [x] Wallet APIs (balance, transactions, top-up, transfer)
+- [x] Wallet APIs (balance, transactions, top-up, transfer, withdrawal)
 - [x] Restaurant & menu APIs (list, detail, menu)
 - [x] Data seeder (test users, restaurants, menu items)
 - [x] Global exception handler
-- [ ] Order APIs (create order, track order, update status)
-- [ ] Ride APIs (pricing engine, ride matching, pooling)
-- [ ] Paystack payment integration
-- [ ] Connect frontend to backend APIs
+- [x] Order APIs (create order, track order, update status)
+- [x] Ride APIs (pricing engine, ride matching, pooling)
+- [x] Paystack payment integration
+- [x] Connect frontend to backend APIs
 
 ### 🔗 Phase 3: Integration & Polish
-- [ ] Connect frontend to backend APIs
-- [ ] Real-time features (maps, order tracking)
+- [x] Connect frontend to backend APIs
+- [x] Real-time features (maps, order tracking, driver GPS stream)
 - [ ] Push notifications (SMS/push)
 - [ ] Testing & bug fixes
 - [ ] Deployment (Expo EAS → app stores)

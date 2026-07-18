@@ -32,6 +32,48 @@ public class RideService {
     }
 
     /**
+     * Calculate estimated fares for all available ride types
+     */
+    public List<FareEstimateOption> estimateFares(Double distanceKm, Integer durationMin) {
+        double dist = distanceKm != null ? distanceKm : 5.0;
+        int dur = durationMin != null ? durationMin : 15;
+
+        // Base formula: 10 GHS base + 2.50/km + 0.50/min
+        double baseFare = 10.0 + (dist * 2.50) + (dur * 0.50);
+
+        return List.of(
+            FareEstimateOption.builder()
+                .rideType(Ride.RideType.STANDARD)
+                .name("GoStandard")
+                .fare(Math.round(baseFare * 100.0) / 100.0)
+                .etaMin(3)
+                .description("Affordable, everyday ride")
+                .build(),
+            FareEstimateOption.builder()
+                .rideType(Ride.RideType.COMFORT)
+                .name("GoComfort")
+                .fare(Math.round(baseFare * 1.40 * 100.0) / 100.0)
+                .etaMin(5)
+                .description("Newer cars with extra legroom & A/C")
+                .build(),
+            FareEstimateOption.builder()
+                .rideType(Ride.RideType.POOL)
+                .name("GoPool (Dynamic)")
+                .fare(Math.round(baseFare * 0.70 * 100.0) / 100.0)
+                .etaMin(6)
+                .description("Share your ride & save 30%")
+                .build(),
+            FareEstimateOption.builder()
+                .rideType(Ride.RideType.BIKER)
+                .name("GoBiker")
+                .fare(Math.round(baseFare * 0.50 * 100.0) / 100.0)
+                .etaMin(2)
+                .description("Beat traffic fast on a motorbike")
+                .build()
+        );
+    }
+
+    /**
      * Book a new ride request
      */
     @Transactional

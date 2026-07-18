@@ -112,10 +112,23 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
   const steps = isGift ? GIFT_STEPS : isPickup ? PICKUP_STEPS : ORDER_STEPS;
   const accentColor = isGift ? '#E91E63' : colors.foodOrange;
 
+  const getStepIndex = (statusStr: string) => {
+    const s = (statusStr || '').toUpperCase();
+    switch (s) {
+      case 'PLACED': return 0;
+      case 'PREPARING': return 1;
+      case 'READY': return 1;
+      case 'PICKED_UP': return 2;
+      case 'DELIVERED': return 3;
+      default: return 0;
+    }
+  };
+
   // Listen to order progress updates from backend WebSockets
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
     let isMounted = true;
+    let pollInterval: NodeJS.Timeout | null = null;
 
     // Connect to WebSocket updates
     unsubscribe = useSocketStore.getState().subscribe('ORDER_STATUS_UPDATE', (payload) => {
@@ -124,17 +137,6 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
       console.log('OrderTrackingScreen received WebSocket status update:', orderData);
       
       if (isMounted && orderData && String(orderData.id) === String(targetOrderId)) {
-        const getStepIndex = (statusStr: string) => {
-          const s = statusStr.toUpperCase();
-          switch (s) {
-            case 'PLACED': return 0;
-            case 'PREPARING': return 1;
-            case 'READY': return 2;
-            case 'PICKED_UP': return 3;
-            case 'DELIVERED': return isPickup ? 3 : 4; 
-            default: return 0;
-          }
-        };
         setCurrentStep((prevStep) => {
           const newStep = getStepIndex(orderData.status);
           if (newStep !== prevStep) {
@@ -149,11 +151,12 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
       }
     });
 
-    // Offline mock fallback mode loop
+    // Offline mock fallback mode loop or Periodic HTTP Polling backup
     let fallbackTimer: NodeJS.Timeout;
-    const isMockOrder = !route.params?.orderId || 
-                        String(route.params.orderId).startsWith('ORD') || 
-                        String(route.params.orderId).startsWith('GFT');
+    const targetOrderId = route.params?.orderId;
+    const isMockOrder = !targetOrderId || 
+                        String(targetOrderId).startsWith('ORD') || 
+                        String(targetOrderId).startsWith('GFT');
     
     if (isMockOrder) {
       console.log('Running in offline mock mode order tracking fallback loop.');
@@ -172,17 +175,34 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
             }
             return prev;
           });
-        }, 5000);
+        }, 3500);
       };
       runOfflineLoop();
+    } else {
+      // Backend HTTP polling backup every 3s
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/orders/${targetOrderId}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data && json.data.status) {
+              const newStep = getStepIndex(json.data.status);
+              setCurrentStep((prev) => (newStep > prev ? newStep : prev));
+            }
+          }
+        } catch (e) {
+          // Silent fallback
+        }
+      }, 3000);
     }
 
     return () => {
       isMounted = false;
       if (unsubscribe) unsubscribe();
       if (fallbackTimer) clearTimeout(fallbackTimer);
+      if (pollInterval) clearInterval(pollInterval);
     };
-  }, [steps.length]);
+  }, [route.params?.orderId]);
 
   const step = steps[currentStep];
 
@@ -397,6 +417,27 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
           </View>
         </View>
 
+        {/* ===== Order Complete Celebration Banner ===== */}
+        {currentStep === steps.length - 1 && (
+          <View style={[styles.completedCard, { backgroundColor: colors.primaryLight, borderColor: colors.primary, borderWidth: 1.5 }]}>
+            <Icon name="check-circle" set="feather" size={32} color={colors.primary} />
+            <Text style={[styles.completedTitle, { color: colors.textPrimary }]}>
+              {isPickup ? 'Order Picked Up! 🎉' : 'Order Delivered! 🎉'}
+            </Text>
+            <Text style={[styles.completedDesc, { color: colors.textSecondary }]}>
+              {isPickup ? 'Thank you for collecting your meal. Enjoy!' : 'Your food has arrived. Thank you for using GoBite!'}
+            </Text>
+            <TouchableOpacity
+              style={[styles.completedBtn, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('Food')}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.completedBtnText}>Back to GoBite</Text>
+              <Icon name="arrow-right" set="feather" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={{ height: 60 }} />
       </ScrollView>
     </SafeAreaView>
@@ -514,5 +555,35 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     fontStyle: 'italic',
     lineHeight: 20,
+  },
+  completedCard: {
+    marginTop: spacing.lg,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  completedTitle: {
+    fontSize: typography.size.xl,
+    fontWeight: '800',
+    marginTop: spacing.sm,
+  },
+  completedDesc: {
+    fontSize: typography.size.sm,
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: spacing.md,
+  },
+  completedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: borderRadius.lg,
+  },
+  completedBtnText: {
+    color: '#FFFFFF',
+    fontSize: typography.size.md,
+    fontWeight: '800',
   },
 });
