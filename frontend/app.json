@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "GoZone",
+    "slug": "gozone-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#00B14F",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gozone.app",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDu92lfFAM2TC1NZh3SR9iYbUP5Tlxn-vs"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#00B14F"
+      },
+      "package": "com.gozone.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDu92lfFAM2TC1NZh3SR9iYbUP5Tlxn-vs"
+        }
+      }
+    }
+  }
+}

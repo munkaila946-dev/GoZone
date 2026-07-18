@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoZone — Theme Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #111;
+    padding: 30px;
+  }
+  h1 { color: #fff; text-align: center; margin-bottom: 8px; }
+  .sub { color: #888; text-align: center; margin-bottom: 30px; font-size: 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 30px;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  /* Theme card container */
+  .theme-block { }
+  .theme-label {
+    color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .theme-label .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    background: rgba(255,255,255,0.15); font-weight: 600;
+  }
+
+  /* Phone mockup */
+  .phone {
+    width: 320px; height: 620px; border-radius: 36px; overflow: hidden;
+    border: 6px solid #333; position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  .phone .screen { height: 100%; padding: 16px; position: relative; }
+
+  /* Mini home screen mock */
+  .greeting { font-size: 14px; opacity: 0.6; }
+  .greeting-name { font-size: 22px; font-weight: 800; }
+  .wallet-card {
+    border-radius: 16px; padding: 18px; margin: 12px 0;
+    color: #fff;
+  }
+  .wallet-label { font-size: 11px; opacity: 0.8; }
+  .wallet-bal { font-size: 28px; font-weight: 800; margin: 4px 0 12px; }
+  .wallet-btns { display: flex; gap: 8px; }
+  .wallet-btn {
+    flex: 1; background: rgba(255,255,255,0.2); border-radius: 8px;
+    padding: 8px; text-align: center; font-size: 11px; font-weight: 600;
+  }
+  .svc-card {
+    display: flex; align-items: center; gap: 12px; border-radius: 14px;
+    padding: 14px; margin-bottom: 8px; border: 1px solid;
+  }
+  .svc-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .svc-title { font-size: 15px; font-weight: 700; }
+  .svc-desc { font-size: 11px; opacity: 0.5; }
+  .svc-arrow { font-size: 22px; font-weight: 700; }
+  .section-title { font-size: 15px; font-weight: 700; margin: 10px 0 8px; }
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 64px;
+    display: flex; justify-content: space-around; align-items: center;
+    border-top: 1px solid; padding-bottom: 6px;
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; }
+  .tab-icon { font-size: 20px; }
+  .color-row { display: flex; gap: 6px; margin-top: 10px; }
+  .color-chip { width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<h1>🎨 GoZone Theme System</h1>
+<p class="sub">4 themes users can switch between — tap any in the app to apply instantly</p>
+
+<div class="grid">
+
+  <!-- ============ LIGHT THEME ============ -->
+  <div class="theme-block">
+    <div class="theme-label">☀️ Light <span class="badge">Daytime</span></div>
+    <div class="phone">
+      <div class="screen" style="background: #F5F6FA;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="greeting" style="color:#9CA3AF;">Good morning,</div>
+            <div class="greeting-name" style="color:#00B14F;">Kwame 👋</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#007E33;display:flex;align-items:center;justify-content:center;">🙂</div>
+        </div>
+        <div class="wallet-card" style="background: linear-gradient(135deg, #00B14F, #007E33);">
+          <div class="wallet-label">SuperWallet Balance</div>
+          <div class="wallet-bal">GH₵ 1,250.00</div>
+          <div class="wallet-btns"><div class="wallet-btn">⬆️ Top Up</div><div class="wallet-btn">⬇️ Withdraw</div><div class="wallet-btn">📤 Send</div></div>
+        </div>
+        <div class="section-title" style="color:#1A1A2E;">Services</div>
+        <div class="svc-card" style="background:#fff; border-color:#E5E7EB;">
+          <div class="svc-icon" style="background:#E3F2FD;">🚗</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#1A1A2E;">GoRide</div><div class="svc-desc" style="color:#9CA3AF;">Get a ride</div></div>
+          <div class="svc-arrow" style="color:#2196F3;">›</div>
+        </div>
+        <div class="svc-card" style="background:#fff; border-color:#E5E7EB;">
+          <div class="svc-icon" style="background:#FFF3EE;">🍔</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#1A1A2E;">GoBite</div><div class="svc-desc" style="color:#9CA3AF;">Order food</div></div>
+          <div class="svc-arrow" style="color:#FF6B35;">›</div>
+        </div>
+        <div class="color-row">
+          <div class="color-chip" style="background:#F5F6FA;"></div>
+          <div class="color-chip" style="background:#fff;border-color:#ddd;"></div>
+          <div class="color-chip" style="background:#00B14F;"></div>
+          <div class="color-chip" style="background:#1A1A2E;"></div>
+          <div class="color-chip" style="background:#FF6B35;"></div>
+        </div>
+        <div class="tab-bar" style="background:#fff; border-color:#F3F4F6;">
+          <div class="tab-item" style="color:#00B14F;"><span class="tab-icon">🏠</span>Home</div>
+          <div class="tab-item" style="color:#9CA3AF;"><span class="tab-icon">🚗</span>Ride</div>
+          <div class="tab-item" style="color:#9CA3AF;"><span class="tab-icon">🍔</span>Food</div>
+          <div class="tab-item" style="color:#9CA3AF;"><span class="tab-icon">👤</span>Profile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DARK THEME ============ -->
+  <div class="theme-block">
+    <div class="theme-label">🌙 Dark <span class="badge">Premium</span></div>
+    <div class="phone">
+      <div class="screen" style="background: #1A1A2E;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="greeting" style="color:#6B7280;">Good morning,</div>
+            <div class="greeting-name" style="color:#00B14F;">Kwame 👋</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#007E33;display:flex;align-items:center;justify-content:center;">🙂</div>
+        </div>
+        <div class="wallet-card" style="background: linear-gradient(135deg, #00B14F, #007E33);">
+          <div class="wallet-label">SuperWallet Balance</div>
+          <div class="wallet-bal">GH₵ 1,250.00</div>
+          <div class="wallet-btns"><div class="wallet-btn">⬆️ Top Up</div><div class="wallet-btn">⬇️ Withdraw</div><div class="wallet-btn">📤 Send</div></div>
+        </div>
+        <div class="section-title" style="color:#fff;">Services</div>
+        <div class="svc-card" style="background:#252540; border-color:rgba(255,255,255,0.08);">
+          <div class="svc-icon" style="background:rgba(33,150,243,0.15);">🚗</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#fff;">GoRide</div><div class="svc-desc" style="color:#6B7280;">Get a ride</div></div>
+          <div class="svc-arrow" style="color:#2196F3;">›</div>
+        </div>
+        <div class="svc-card" style="background:#252540; border-color:rgba(255,255,255,0.08);">
+          <div class="svc-icon" style="background:rgba(255,107,53,0.15);">🍔</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#fff;">GoBite</div><div class="svc-desc" style="color:#6B7280;">Order food</div></div>
+          <div class="svc-arrow" style="color:#FF6B35;">›</div>
+        </div>
+        <div class="color-row">
+          <div class="color-chip" style="background:#1A1A2E;"></div>
+          <div class="color-chip" style="background:#252540;"></div>
+          <div class="color-chip" style="background:#00B14F;"></div>
+          <div class="color-chip" style="background:#fff;"></div>
+          <div class="color-chip" style="background:#FF6B35;"></div>
+        </div>
+        <div class="tab-bar" style="background:#252540; border-color:rgba(255,255,255,0.06);">
+          <div class="tab-item" style="color:#00B14F;"><span class="tab-icon">🏠</span>Home</div>
+          <div class="tab-item" style="color:#6B7280;"><span class="tab-icon">🚗</span>Ride</div>
+          <div class="tab-item" style="color:#6B7280;"><span class="tab-icon">🍔</span>Food</div>
+          <div class="tab-item" style="color:#6B7280;"><span class="tab-icon">👤</span>Profile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MIDNIGHT THEME ============ -->
+  <div class="theme-block">
+    <div class="theme-label">🌌 Midnight <span class="badge">Teal Accent</span></div>
+    <div class="phone">
+      <div class="screen" style="background: #0D1117;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="greeting" style="color:#6E7681;">Good morning,</div>
+            <div class="greeting-name" style="color:#00D9B2;">Kwame 👋</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#00A88A;display:flex;align-items:center;justify-content:center;">🙂</div>
+        </div>
+        <div class="wallet-card" style="background: linear-gradient(135deg, #00D9B2, #00A88A);">
+          <div class="wallet-label">SuperWallet Balance</div>
+          <div class="wallet-bal">GH₵ 1,250.00</div>
+          <div class="wallet-btns"><div class="wallet-btn">⬆️ Top Up</div><div class="wallet-btn">⬇️ Withdraw</div><div class="wallet-btn">📤 Send</div></div>
+        </div>
+        <div class="section-title" style="color:#F0F6FC;">Services</div>
+        <div class="svc-card" style="background:#161B22; border-color:rgba(240,246,252,0.1);">
+          <div class="svc-icon" style="background:rgba(88,166,255,0.15);">🚗</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#F0F6FC;">GoRide</div><div class="svc-desc" style="color:#6E7681;">Get a ride</div></div>
+          <div class="svc-arrow" style="color:#58A6FF;">›</div>
+        </div>
+        <div class="svc-card" style="background:#161B22; border-color:rgba(240,246,252,0.1);">
+          <div class="svc-icon" style="background:rgba(255,123,84,0.15);">🍔</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#F0F6FC;">GoBite</div><div class="svc-desc" style="color:#6E7681;">Order food</div></div>
+          <div class="svc-arrow" style="color:#FF7B54;">›</div>
+        </div>
+        <div class="color-row">
+          <div class="color-chip" style="background:#0D1117;"></div>
+          <div class="color-chip" style="background:#161B22;"></div>
+          <div class="color-chip" style="background:#00D9B2;"></div>
+          <div class="color-chip" style="background:#F0F6FC;"></div>
+          <div class="color-chip" style="background:#58A6FF;"></div>
+        </div>
+        <div class="tab-bar" style="background:#161B22; border-color:rgba(240,246,252,0.1);">
+          <div class="tab-item" style="color:#00D9B2;"><span class="tab-icon">🏠</span>Home</div>
+          <div class="tab-item" style="color:#6E7681;"><span class="tab-icon">🚗</span>Ride</div>
+          <div class="tab-item" style="color:#6E7681;"><span class="tab-icon">🍔</span>Food</div>
+          <div class="tab-item" style="color:#6E7681;"><span class="tab-icon">👤</span>Profile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SUNSET THEME ============ -->
+  <div class="theme-block">
+    <div class="theme-label">🌅 Sunset <span class="badge">Warm Gold</span></div>
+    <div class="phone">
+      <div class="screen" style="background: #1E1410;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="greeting" style="color:#8A7060;">Good morning,</div>
+            <div class="greeting-name" style="color:#F59E0B;">Kwame 👋</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#D97706;display:flex;align-items:center;justify-content:center;">🙂</div>
+        </div>
+        <div class="wallet-card" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+          <div class="wallet-label">SuperWallet Balance</div>
+          <div class="wallet-bal">GH₵ 1,250.00</div>
+          <div class="wallet-btns"><div class="wallet-btn">⬆️ Top Up</div><div class="wallet-btn">⬇️ Withdraw</div><div class="wallet-btn">📤 Send</div></div>
+        </div>
+        <div class="section-title" style="color:#FFF8F0;">Services</div>
+        <div class="svc-card" style="background:#2D1F18; border-color:rgba(255,248,240,0.08);">
+          <div class="svc-icon" style="background:rgba(251,146,60,0.15);">🚗</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#FFF8F0;">GoRide</div><div class="svc-desc" style="color:#8A7060;">Get a ride</div></div>
+          <div class="svc-arrow" style="color:#FB923C;">›</div>
+        </div>
+        <div class="svc-card" style="background:#2D1F18; border-color:rgba(255,248,240,0.08);">
+          <div class="svc-icon" style="background:rgba(239,68,68,0.15);">🍔</div>
+          <div style="flex:1;"><div class="svc-title" style="color:#FFF8F0;">GoBite</div><div class="svc-desc" style="color:#8A7060;">Order food</div></div>
+          <div class="svc-arrow" style="color:#EF4444;">›</div>
+        </div>
+        <div class="color-row">
+          <div class="color-chip" style="background:#1E1410;"></div>
+          <div class="color-chip" style="background:#2D1F18;"></div>
+          <div class="color-chip" style="background:#F59E0B;"></div>
+          <div class="color-chip" style="background:#FFF8F0;"></div>
+          <div class="color-chip" style="background:#EF4444;"></div>
+        </div>
+        <div class="tab-bar" style="background:#2D1F18; border-color:rgba(255,248,240,0.08);">
+          <div class="tab-item" style="color:#F59E0B;"><span class="tab-icon">🏠</span>Home</div>
+          <div class="tab-item" style="color:#8A7060;"><span class="tab-icon">🚗</span>Ride</div>
+          <div class="tab-item" style="color:#8A7060;"><span class="tab-icon">🍔</span>Food</div>
+          <div class="tab-item" style="color:#8A7060;"><span class="tab-icon">👤</span>Profile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center; margin-top:40px; color:#666; font-size:13px;">
+  Open <code style="color:#00B14F;">GoZone/design-mockups/theme-preview.html</code> in your browser to see this.
+  <br>In the app: Profile → Appearance → Choose any theme 🎨
+</div>
+
+</body>
+</html>

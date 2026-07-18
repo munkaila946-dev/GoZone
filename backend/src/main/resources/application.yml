@@ -1,0 +1,60 @@
+# ============================================================
+# GoZone Backend Configuration
+# ============================================================
+# This file configures the database connection, server settings,
+# and JWT secrets. Copy this to application-local.yml and change
+# the values for your local setup.
+# ============================================================
+
+server:
+  port: 8080
+
+spring:
+  # ===== Database Configuration =====
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gozone_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # ===== JPA / Hibernate =====
+  jpa:
+    hibernate:
+      # Automatically create/update database tables based on entities
+      #ddl-auto: update          # Safe — only updates, never drops
+      ddl-auto: create-drop       # Use during development (recreates on restart)
+    show-sql: true              # Print SQL queries to console (for debugging)
+    properties:
+      hibernate:
+        format_sql: true        # Pretty-print SQL queries
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ===== Jackson (JSON serialization) =====
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false  # Use ISO date format (2026-06-22T10:30:00)
+
+# ============================================================
+# Custom Application Properties
+# ============================================================
+app:
+  # JWT Settings
+  jwt:
+    secret: "GoZoneSuperSecretKeyForJWTTokenGeneration2026ThisNeedsToBeAtLeast256BitsLong!!"
+    expiration-ms: 86400000    # 24 hours in milliseconds (1000 * 60 * 60 * 24)
+
+  # CORS Settings (allow frontend to connect)
+  cors:
+    allowed-origins: "*"
+
+  # Paystack Configuration
+  paystack:
+    secret-key: ${PAYSTACK_SECRET_KEY:sk_test_f3eafbe468b03a1aa32a598a57811d59a3584f20}
+
+# ============================================================
+# Logging
+# ============================================================
+logging:
+  level:
+    com.gozone: DEBUG           # Debug logging for our app code
+    org.hibernate.SQL: DEBUG    # Show SQL queries
