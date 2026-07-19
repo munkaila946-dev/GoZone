@@ -1313,7 +1313,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 10,
     alignItems: 'center',
-    justify.content: 'center',
+    justifyContent: 'center',
   },
   paymentTitle: {
     fontSize: typography.size.sm,
