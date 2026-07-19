@@ -205,7 +205,7 @@ const RideOptionItem = ({
 
   const handlePressIn = () => {
     Animated.spring(scale, {
-      toValue: 0.94,
+      toValue: 0.97,
       useNativeDriver: true,
       tension: 120,
       friction: 6,
@@ -227,21 +227,50 @@ const RideOptionItem = ({
       onPressOut={handlePressOut}
       onPress={onPress}
       activeOpacity={0.9}
-      style={{ flex: 1 }}
+      style={{ width: '100%', marginBottom: 10 }}
     >
       <Animated.View style={[
-        styles.rideOption,
+        styles.boltRideCard,
         {
-          backgroundColor: colors.surfaceAlt,
+          backgroundColor: isSelected ? colors.primaryLight : colors.surfaceAlt,
           borderColor: isSelected ? accentColor : colors.border,
-          borderWidth: 1.5,
+          borderWidth: isSelected ? 2 : 1,
           transform: [{ scale }]
         }
       ]}>
-        <Icon name={option.icon} set={option.iconSet || 'material'} size={24} color={isSelected ? accentColor : colors.textTertiary} />
-        <Text style={[styles.rideType, { color: colors.textPrimary }]}>{option.type}</Text>
-        <Text style={[styles.ridePrice, { color: colors.textPrimary }]}>GH₵{option.price}</Text>
-        <Text style={[styles.rideEta, { color: colors.textTertiary }]}>{option.eta} min</Text>
+        {/* Left Icon Badge */}
+        <View style={[
+          styles.boltVehicleBadge,
+          { backgroundColor: isSelected ? accentColor : colors.surface }
+        ]}>
+          <Icon name={option.icon} set={option.iconSet || 'material'} size={24} color={isSelected ? '#FFFFFF' : accentColor} />
+        </View>
+
+        {/* Middle Info */}
+        <View style={styles.boltInfoCol}>
+          <View style={styles.boltTitleRow}>
+            <Text style={[styles.boltRideTitle, { color: colors.textPrimary }]}>{option.type}</Text>
+            <View style={[styles.boltSeatsPill, { backgroundColor: colors.surface }]}>
+              <Icon name="user" set="feather" size={10} color={colors.textSecondary} />
+              <Text style={[styles.boltSeatsText, { color: colors.textSecondary }]}>{option.seats}</Text>
+            </View>
+          </View>
+          <Text style={[styles.boltRideDesc, { color: colors.textTertiary }]} numberOfLines={1}>
+            {option.desc} • {option.eta} min away
+          </Text>
+        </View>
+
+        {/* Right Price */}
+        <View style={styles.boltPriceCol}>
+          <Text style={[styles.boltPriceText, { color: isSelected ? accentColor : colors.textPrimary }]}>
+            GH₵{option.price}
+          </Text>
+          {isSelected && (
+            <View style={[styles.selectedCheckDot, { backgroundColor: accentColor }]}>
+              <Icon name="check" set="feather" size={10} color="#FFFFFF" />
+            </View>
+          )}
+        </View>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -964,7 +993,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                   </TouchableOpacity>
                 </View>
 
-                {/* Ride Options (Dynamic Purple/Green accents matching active theme configuration) */}
+                {/* Ride Options */}
                 <View style={styles.rideOptions}>
                   {RIDE_OPTIONS.map((option) => {
                     const isSelected = selectedRide === option.id;
@@ -981,6 +1010,24 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                     );
                   })}
                 </View>
+
+                {/* Bolt-style Payment Selector Bar */}
+                <TouchableOpacity 
+                  style={[styles.paymentBar, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
+                  onPress={() => Alert.alert('Payment Method', 'Payment method set to SuperWallet Balance (GH₵250.00)')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.paymentLeft}>
+                    <View style={[styles.paymentIconWrap, { backgroundColor: colors.primaryLight }]}>
+                      <Icon name="credit-card" set="feather" size={14} color={colors.primary} />
+                    </View>
+                    <View>
+                      <Text style={[styles.paymentTitle, { color: colors.textPrimary }]}>SuperWallet Balance</Text>
+                      <Text style={[styles.paymentSub, { color: colors.textTertiary }]}>Available: GH₵250.00</Text>
+                    </View>
+                  </View>
+                  <Icon name="chevron-right" set="feather" size={16} color={colors.textTertiary} />
+                </TouchableOpacity>
 
                 {/* Confirm Button with dynamic color background */}
                 <TouchableOpacity
@@ -1184,16 +1231,98 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Ride options
-  rideOptions: { flexDirection: 'row', gap: 8, marginBottom: spacing.xl },
-  rideOption: {
-    flex: 1, alignItems: 'center', gap: 2,
-    paddingVertical: spacing.md,
+  // Ride options (Bolt style full width list)
+  rideOptions: { flexDirection: 'column', gap: 0, marginBottom: spacing.md },
+  boltRideCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
     borderRadius: 18,
+    gap: 12,
   },
-  rideType: { fontSize: 11, fontWeight: '700', marginTop: 4 },
-  ridePrice: { fontSize: typography.size.base, fontWeight: '800', marginTop: 2 },
-  rideEta: { fontSize: 10 },
+  boltVehicleBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boltInfoCol: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  boltTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  boltRideTitle: {
+    fontSize: typography.size.md,
+    fontWeight: '700',
+  },
+  boltSeatsPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  boltSeatsText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  boltRideDesc: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  boltPriceCol: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  boltPriceText: {
+    fontSize: typography.size.md,
+    fontWeight: '800',
+  },
+  selectedCheckDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+
+  // Payment bar
+  paymentBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+  },
+  paymentLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  paymentIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justify.content: 'center',
+  },
+  paymentTitle: {
+    fontSize: typography.size.sm,
+    fontWeight: '700',
+  },
+  paymentSub: {
+    fontSize: 11,
+    marginTop: 1,
+  },
 
   // Confirm Button
   confirmBtn: {

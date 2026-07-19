@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@hooks/useTheme';
@@ -404,10 +405,10 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
               </View>
             </View>
             <View style={styles.vehicleInfo}>
-              <View style={styles.plateNumber}>
-                <Text style={[styles.plateText, { color: colors.textPrimary }]}>GR 2847-24</Text>
+              <View style={[styles.plateNumber, { backgroundColor: '#FFD700', borderColor: '#000000', borderWidth: 1 }]}>
+                <Text style={[styles.plateText, { color: '#000000', fontWeight: '800' }]}>GW-4921-23</Text>
               </View>
-              <Text style={[styles.vehicleMeta, { color: colors.textTertiary }]}>Silver Toyota Corolla</Text>
+              <Text style={[styles.vehicleMeta, { color: colors.textTertiary }]}>Toyota Vitz • Silver</Text>
             </View>
           </View>
         )}
@@ -448,7 +449,7 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
               iconSet="feather"
               label="Message"
               colors={colors}
-              onPress={() => {}}
+              onPress={() => Alert.alert('Chat Driver', `Opening chat with ${params.driverName || 'Kwame Asante'}...`)}
             />
             <RideActionButton
               icon="phone"
@@ -456,14 +457,14 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
               label="Call"
               color={colors.primary}
               colors={colors}
-              onPress={() => {}}
+              onPress={() => Alert.alert('Call Driver', `Dialing ${params.driverName || 'Kwame Asante'} (+233 24 123 4567)...`)}
             />
             <RideActionButton
-              icon="shield"
+              icon="share-2"
               iconSet="feather"
-              label="Safety"
+              label="Share Trip"
               colors={colors}
-              onPress={() => {}}
+              onPress={() => Alert.alert('Share Trip ETA 📲', 'Live tracking link copied to clipboard! Share with your friends or family.')}
             />
           </View>
         ) : (
