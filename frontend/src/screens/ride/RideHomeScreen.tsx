@@ -1060,8 +1060,8 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                   </View>
                 </View>
 
-            {/* Conditional Content: If searching, show suggestions. Else show chips + options */}
-            {activeField && suggestions.length > 0 ? (
+                {/* Conditional Content: If searching, show suggestions. Else show chips + options */}
+                {activeField && suggestions.length > 0 ? (
               <View style={styles.suggestionsContainer}>
                 {suggestions.map((item, index) => {
                   const parts = item.name.split(',');
@@ -1273,7 +1273,9 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                 </TouchableOpacity>
               </>
             )}
-          </Animated.View>
+          </>
+        )}
+      </Animated.View>
         </Animated.View>
       </KeyboardAvoidingView>
     </SafeAreaView>
