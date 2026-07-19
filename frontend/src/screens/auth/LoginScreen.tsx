@@ -163,7 +163,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, navigation })
         `Your GoZone OTP is: ${generatedOtp}\n\nUse this code to verify your phone number.`
       );
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Could not reach backend server.');
+      Alert.alert(
+        'Login Options',
+        'Unable to connect to backend server. Would you like to enter Demo Mode with preloaded wallet balance (GH₵ 1,250)?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: '🚀 Enter Demo Mode', onPress: () => onLogin() }
+        ]
+      );
     } finally {
       setLoading(false);
     }
