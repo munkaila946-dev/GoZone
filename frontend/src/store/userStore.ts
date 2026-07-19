@@ -55,9 +55,9 @@ export const useUserStore = create<UserState>((set, get) => ({
   rides: [],
   orders: [],
   avatarUrl: null,
-  token: null,
-  userId: null,
-  isAuthenticated: false,
+  token: 'demo-token-12345',
+  userId: 1,
+  isAuthenticated: true,
 
   // Get first name (for greeting)
   firstName: () => {
