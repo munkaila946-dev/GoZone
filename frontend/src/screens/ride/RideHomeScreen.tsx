@@ -318,23 +318,37 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
   // PanResponder to detect swipe up/down on bottom sheet handle
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => isMinimized,
-      onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dy) > 5,
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dy) > 3,
       onPanResponderMove: (evt, gestureState) => {
-        let targetValue = (isMinimized ? 320 : 0) + gestureState.dy;
+        let targetValue = (isMinimized ? 340 : 0) + gestureState.dy;
         if (targetValue < 0) targetValue = 0;
-        if (targetValue > 320) targetValue = 320;
+        if (targetValue > 340) targetValue = 340;
         sheetTranslateY.setValue(targetValue);
       },
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 60 || gestureState.vy > 0.4) {
+        if (gestureState.dy > 50 || gestureState.vy > 0.3) {
           setIsMinimized(true);
-        } else if (gestureState.dy < -60 || gestureState.vy < -0.4) {
+          Animated.spring(sheetTranslateY, {
+            toValue: 340,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }).start();
+        } else if (gestureState.dy < -50 || gestureState.vy < -0.3) {
           setIsMinimized(false);
+          Animated.spring(sheetTranslateY, {
+            toValue: 0,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }).start();
         } else {
           // Snap back
           Animated.spring(sheetTranslateY, {
-            toValue: isMinimized ? 320 : 0,
+            toValue: isMinimized ? 340 : 0,
+            tension: 40,
+            friction: 8,
             useNativeDriver: true,
           }).start();
         }
@@ -844,26 +858,28 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
               <View style={[styles.handle, { backgroundColor: colors.border, marginBottom: 0 }]} />
             </TouchableOpacity>
 
-            {/* Title Row */}
-            <View style={styles.titleRow}>
-              <Text style={[styles.sheetTitle, { color: colors.textPrimary }]}>
-                {isMinimized ? "Map View" : "Choose a ride"}
+          {/* Swipeable Header Area (Handle + Title) */}
+          <View {...panResponder.panHandlers} style={{ width: '100%' }}>
+            {/* Handle */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setIsMinimized(!isMinimized)}
+              style={{ paddingVertical: 10, width: '100%', alignItems: 'center' }}
+            >
+              <View style={[styles.handle, { backgroundColor: colors.border, width: 44, height: 5, borderRadius: 3, marginBottom: 0 }]} />
+            </TouchableOpacity>
+
+            {/* Title Row - Exact Bolt Screenshot Header */}
+            <View style={[styles.titleRow, { marginTop: 4, marginBottom: 16 }]}>
+              <Text style={[styles.boltHeaderTitle, { color: colors.textPrimary }]}>
+                {isMinimized ? "Map View" : (destination ? "Choose a ride" : "Let's get you on your way.")}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                {!isMinimized && (
-                  <TouchableOpacity style={[styles.timeBadge, { backgroundColor: colors.primaryLight }]}>
-                    <Icon name="clock-time-four" set="material" size={13} color={colors.primary} />
-                    <Text style={[styles.timeText, { color: colors.primary }]}>Now</Text>
-                    <Icon name="chevron-down" set="feather" size={12} color={colors.primary} />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => setIsMinimized(!isMinimized)}
-                  style={[styles.minimizeBtn, { backgroundColor: colors.surfaceAlt }]}
-                >
-                  <Icon name={isMinimized ? "chevron-up" : "chevron-down"} set="feather" size={18} color={colors.textPrimary} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={() => setIsMinimized(!isMinimized)}
+                style={[styles.minimizeBtn, { backgroundColor: colors.surfaceAlt }]}
+              >
+                <Icon name={isMinimized ? "chevron-up" : "chevron-down"} set="feather" size={18} color={colors.textPrimary} />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -871,67 +887,178 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             pointerEvents={isMinimized ? 'none' : 'auto'}
             style={{ opacity: contentOpacity }}
           >
+            {/* If no destination set yet, show exact Bolt Home Screenshot layout (3 Service Grid Cards + Large Where To search + Recent Places) */}
+            {!destination && !activeField ? (
+              <>
+                {/* 3 Top Service Cards (Rides, Bolt Food, Bolt Send) */}
+                <View style={styles.boltServiceGrid}>
+                  <TouchableOpacity 
+                    style={[styles.boltServiceCard, { backgroundColor: colors.surfaceAlt, borderColor: colors.primary, borderWidth: 1.5 }]}
+                    onPress={() => setActiveField('destination')}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.primaryLight }]}>
+                      <Icon name="car-sports" set="material" size={26} color={colors.primary} />
+                    </View>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Rides</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Let's get moving</Text>
+                  </TouchableOpacity>
 
-            {/* Location Inputs Container */}
-            <View style={[styles.inputContainer, { backgroundColor: colors.surfaceAlt }]}>
-              <View style={styles.inputRow}>
-                <View style={[styles.inputDot, { backgroundColor: colors.primary }]} />
-                <TextInput
-                  style={[styles.input, { color: colors.textPrimary }]}
-                  value={pickup}
-                  onChangeText={(text) => handleSearch(text, 'pickup')}
-                  onFocus={() => {
-                    setActiveField('pickup');
-                    handleSearch(pickup, 'pickup');
-                  }}
-                  placeholder="Pickup location"
-                  placeholderTextColor={colors.textTertiary}
-                />
-                {activeField === 'pickup' && pickup.length > 0 && (
-                  <TouchableOpacity
-                    style={[styles.plusIconWrap, { backgroundColor: colors.border }]}
-                    onPress={() => {
-                      setPickup('');
-                      setPickupCoords(null);
-                      handleSearch('', 'pickup');
-                    }}
+                  <TouchableOpacity 
+                    style={[styles.boltServiceCard, { backgroundColor: colors.surfaceAlt }]}
+                    onPress={() => (navigation as any).navigate('Food')}
+                    activeOpacity={0.85}
                   >
-                    <Icon name="x" set="feather" size={12} color={colors.textPrimary} />
+                    <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.foodOrangeLight }]}>
+                      <Icon name="hamburger" set="material" size={26} color={colors.foodOrange} />
+                    </View>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Bolt Food</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Quick delivery</Text>
                   </TouchableOpacity>
-                )}
-                <View style={[styles.inputLine, { backgroundColor: colors.border }]} />
-              </View>
-              <View style={styles.inputRow}>
-                <Icon name="map-pin" set="feather" size={14} color={colors.foodOrange} style={{ marginRight: 8 }} />
-                <TextInput
-                  style={[styles.input, { color: colors.textPrimary }]}
-                  value={destination}
-                  onChangeText={(text) => handleSearch(text, 'destination')}
-                  onFocus={() => {
+
+                  <TouchableOpacity 
+                    style={[styles.boltServiceCard, { backgroundColor: colors.surfaceAlt }]}
+                    onPress={() => Alert.alert('Bolt Send 📦', 'GoZone Express Delivery: Send packages safely across town!')}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.rideBlueLight }]}>
+                      <Icon name="package-variant-closed" set="material" size={26} color={colors.rideBlue} />
+                    </View>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Bolt Send</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Send or receive</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Large "Where to?" Search Pill Bar */}
+                <TouchableOpacity
+                  style={[styles.boltWhereToBar, { backgroundColor: colors.surfaceAlt }]}
+                  onPress={() => {
                     setActiveField('destination');
-                    handleSearch(destination, 'destination');
+                    handleSearch('', 'destination');
                   }}
-                  placeholder="Where to?"
-                  placeholderTextColor={colors.textTertiary}
-                />
-                {activeField === 'destination' && destination.length > 0 ? (
+                  activeOpacity={0.85}
+                >
+                  <Icon name="search" set="feather" size={20} color={colors.textPrimary} style={{ marginRight: 12 }} />
+                  <Text style={[styles.boltWhereToText, { color: colors.textPrimary }]}>Where to?</Text>
+                </TouchableOpacity>
+
+                {/* Exact Screenshot Recent Places List */}
+                <View style={styles.boltRecentList}>
                   <TouchableOpacity
-                    style={[styles.plusIconWrap, { backgroundColor: colors.border }]}
-                    onPress={() => {
-                      setDestination('');
-                      setDestinationCoords(null);
-                      handleSearch('', 'destination');
-                    }}
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Trinity Oil')}
+                    activeOpacity={0.7}
                   >
-                    <Icon name="x" set="feather" size={12} color={colors.textPrimary} />
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="clock" set="feather" size={16} color={colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Trinity Oil - petroleum gas station</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
+                    </View>
                   </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity style={[styles.plusIconWrap, { backgroundColor: colors.border }]}>
-                    <Icon name="plus" set="feather" size={14} color={colors.textPrimary} />
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Atta-Mills')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="clock" set="feather" size={16} color={colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Atta-Mills Junction 9</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
+                    </View>
                   </TouchableOpacity>
-                )}
-              </View>
-            </View>
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Tech Junction')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="bus" set="feather" size={16} color={colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Tech Junction</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('East Legon')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="home" set="feather" size={16} color={colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>East Legon</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Accra</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                {/* Location Inputs Container */}
+                <View style={[styles.inputContainer, { backgroundColor: colors.surfaceAlt }]}>
+                  <View style={styles.inputRow}>
+                    <View style={[styles.inputDot, { backgroundColor: colors.primary }]} />
+                    <TextInput
+                      style={[styles.input, { color: colors.textPrimary }]}
+                      value={pickup}
+                      onChangeText={(text) => handleSearch(text, 'pickup')}
+                      onFocus={() => {
+                        setActiveField('pickup');
+                        handleSearch(pickup, 'pickup');
+                      }}
+                      placeholder="Pickup location"
+                      placeholderTextColor={colors.textTertiary}
+                    />
+                    {activeField === 'pickup' && pickup.length > 0 && (
+                      <TouchableOpacity
+                        style={[styles.plusIconWrap, { backgroundColor: colors.border }]}
+                        onPress={() => {
+                          setPickup('');
+                          setPickupCoords(null);
+                          handleSearch('', 'pickup');
+                        }}
+                      >
+                        <Icon name="x" set="feather" size={12} color={colors.textPrimary} />
+                      </TouchableOpacity>
+                    )}
+                    <View style={[styles.inputLine, { backgroundColor: colors.border }]} />
+                  </View>
+                  <View style={styles.inputRow}>
+                    <Icon name="map-pin" set="feather" size={14} color={colors.foodOrange} style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={[styles.input, { color: colors.textPrimary }]}
+                      value={destination}
+                      onChangeText={(text) => handleSearch(text, 'destination')}
+                      onFocus={() => {
+                        setActiveField('destination');
+                        handleSearch(destination, 'destination');
+                      }}
+                      placeholder="Where to?"
+                      placeholderTextColor={colors.textTertiary}
+                    />
+                    {destination.length > 0 && (
+                      <TouchableOpacity
+                        style={[styles.plusIconWrap, { backgroundColor: colors.border }]}
+                        onPress={() => {
+                          setDestination('');
+                          setDestinationCoords(null);
+                          setActiveField(null);
+                        }}
+                      >
+                        <Icon name="x" set="feather" size={12} color={colors.textPrimary} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
 
             {/* Conditional Content: If searching, show suggestions. Else show chips + options */}
             {activeField && suggestions.length > 0 ? (
@@ -1200,6 +1327,77 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   timeText: { fontSize: typography.size.sm, fontWeight: '600' },
+
+  // Exact Bolt Screenshot UI Styles
+  boltHeaderTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  boltServiceGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: spacing.lg,
+  },
+  boltServiceCard: {
+    flex: 1,
+    padding: spacing.md,
+    borderRadius: 18,
+    alignItems: 'flex-start',
+  },
+  boltServiceIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  boltServiceTitle: {
+    fontSize: typography.size.sm,
+    fontWeight: '700',
+  },
+  boltServiceSub: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  boltWhereToBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 16,
+    marginBottom: spacing.lg,
+  },
+  boltWhereToText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  boltRecentList: {
+    marginBottom: spacing.md,
+  },
+  boltRecentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    gap: 14,
+  },
+  boltRecentIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boltRecentTitle: {
+    fontSize: typography.size.sm,
+    fontWeight: '600',
+  },
+  boltRecentSub: {
+    fontSize: 11,
+    marginTop: 2,
+  },
 
   // Inputs
   inputContainer: { borderRadius: borderRadius.lg, padding: 4, marginBottom: spacing.md },
