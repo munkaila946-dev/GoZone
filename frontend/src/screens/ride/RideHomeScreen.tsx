@@ -853,17 +853,6 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => setIsMinimized(!isMinimized)}
-              style={{ paddingVertical: 12, width: '100%', alignItems: 'center' }}
-            >
-              <View style={[styles.handle, { backgroundColor: colors.border, marginBottom: 0 }]} />
-            </TouchableOpacity>
-
-          {/* Swipeable Header Area (Handle + Title) */}
-          <View {...panResponder.panHandlers} style={{ width: '100%' }}>
-            {/* Handle */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => setIsMinimized(!isMinimized)}
               style={{ paddingVertical: 10, width: '100%', alignItems: 'center' }}
             >
               <View style={[styles.handle, { backgroundColor: colors.border, width: 44, height: 5, borderRadius: 3, marginBottom: 0 }]} />
