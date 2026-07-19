@@ -285,6 +285,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
   const [isMinimized, setIsMinimized] = useState(false);
 
   const sheetTranslateY = useRef(new Animated.Value(0)).current;
+  const lastOffsetRef = useRef(0);
   const confirmBtnScale = useRef(new Animated.Value(1)).current;
 
   const handleConfirmPressIn = () => {
@@ -305,52 +306,54 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
     }).start();
   };
 
-  // Synced spring animations for tap toggles
-  useEffect(() => {
+  const animateSheetTo = (targetY: number) => {
+    lastOffsetRef.current = targetY;
+    setIsMinimized(targetY > 150);
     Animated.spring(sheetTranslateY, {
-      toValue: isMinimized ? 320 : 0,
-      tension: 35,
-      friction: 8,
+      toValue: targetY,
+      bounciness: 3,
+      speed: 14,
       useNativeDriver: true,
     }).start();
-  }, [isMinimized]);
+  };
 
   // PanResponder to detect swipe up/down on bottom sheet handle
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dy) > 3,
+      onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dy) > 2,
+      onPanResponderGrant: () => {
+        sheetTranslateY.stopAnimation((val) => {
+          lastOffsetRef.current = val;
+        });
+      },
       onPanResponderMove: (evt, gestureState) => {
-        let targetValue = (isMinimized ? 340 : 0) + gestureState.dy;
-        if (targetValue < 0) targetValue = 0;
-        if (targetValue > 340) targetValue = 340;
+        let targetValue = lastOffsetRef.current + gestureState.dy;
+        if (targetValue < 0) {
+          // Subtle rubber banding when pulling up past top boundary
+          targetValue = targetValue * 0.2;
+        } else if (targetValue > 340) {
+          // Subtle rubber banding when pulling down past bottom boundary
+          targetValue = 340 + (targetValue - 340) * 0.2;
+        }
         sheetTranslateY.setValue(targetValue);
       },
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 50 || gestureState.vy > 0.3) {
-          setIsMinimized(true);
-          Animated.spring(sheetTranslateY, {
-            toValue: 340,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }).start();
-        } else if (gestureState.dy < -50 || gestureState.vy < -0.3) {
-          setIsMinimized(false);
-          Animated.spring(sheetTranslateY, {
-            toValue: 0,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }).start();
+        // High-velocity flick or distance threshold determination
+        if (gestureState.vy < -0.25 || (gestureState.dy < -40 && gestureState.vy <= 0)) {
+          // Slide up smoothly to fully open
+          animateSheetTo(0);
+        } else if (gestureState.vy > 0.25 || (gestureState.dy > 40 && gestureState.vy >= 0)) {
+          // Slide down smoothly to collapsed peek view
+          animateSheetTo(340);
         } else {
-          // Snap back
-          Animated.spring(sheetTranslateY, {
-            toValue: isMinimized ? 340 : 0,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }).start();
+          // Snap to nearest position
+          const currentPos = lastOffsetRef.current + gestureState.dy;
+          if (currentPos > 170) {
+            animateSheetTo(340);
+          } else {
+            animateSheetTo(0);
+          }
         }
       },
     })
@@ -852,7 +855,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             {/* Handle */}
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setIsMinimized(!isMinimized)}
+              onPress={() => animateSheetTo(isMinimized ? 0 : 340)}
               style={{ paddingVertical: 10, width: '100%', alignItems: 'center' }}
             >
               <View style={[styles.handle, { backgroundColor: colors.border, width: 44, height: 5, borderRadius: 3, marginBottom: 0 }]} />
@@ -864,7 +867,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                 {isMinimized ? "Map View" : (destination ? "Choose a ride" : "Let's get you on your way.")}
               </Text>
               <TouchableOpacity
-                onPress={() => setIsMinimized(!isMinimized)}
+                onPress={() => animateSheetTo(isMinimized ? 0 : 340)}
                 style={[styles.minimizeBtn, { backgroundColor: colors.surfaceAlt }]}
               >
                 <Icon name={isMinimized ? "chevron-up" : "chevron-down"} set="feather" size={18} color={colors.textPrimary} />
