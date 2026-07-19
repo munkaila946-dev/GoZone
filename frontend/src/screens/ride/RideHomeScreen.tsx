@@ -276,6 +276,87 @@ const RideOptionItem = ({
   );
 };
 
+// Uber/Bolt Realistic 3D Top-Down Vehicle Marker
+const TopDownCarMarker: React.FC<{ type: string; color: string; isDark: boolean }> = ({ type, color, isDark }) => {
+  const isBike = type === 'GoBiker';
+  return (
+    <View style={{ width: 26, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+      {isBike ? (
+        // Sleek Motorbike Top-Down Silhouette
+        <View style={{
+          width: 14,
+          height: 32,
+          backgroundColor: '#0F172A',
+          borderRadius: 6,
+          borderWidth: 1.5,
+          borderColor: color,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.35,
+          shadowRadius: 3,
+          elevation: 4,
+        }}>
+          <View style={{ width: 10, height: 4, backgroundColor: '#38BDF8', borderRadius: 1, marginTop: 2 }} />
+          <View style={{ width: 8, height: 10, backgroundColor: color, borderRadius: 2, marginTop: 2 }} />
+        </View>
+      ) : (
+        // Professional 3D Top-Down Car Silhouette
+        <View style={{
+          width: 22,
+          height: 40,
+          backgroundColor: isDark ? '#1E293B' : '#0F172A',
+          borderRadius: 7,
+          borderWidth: 1.5,
+          borderColor: color,
+          position: 'relative',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.4,
+          shadowRadius: 4,
+          elevation: 5,
+          alignItems: 'center',
+        }}>
+          {/* Front Windshield */}
+          <View style={{
+            width: 15,
+            height: 7,
+            backgroundColor: '#38BDF8',
+            borderRadius: 2,
+            marginTop: 5,
+            opacity: 0.9,
+          }} />
+          {/* Car Roof & Cabin */}
+          <View style={{
+            width: 17,
+            height: 13,
+            backgroundColor: '#020617',
+            borderRadius: 3,
+            marginTop: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <View style={{ width: 10, height: 2, backgroundColor: color, borderRadius: 1 }} />
+          </View>
+          {/* Rear Windshield */}
+          <View style={{
+            width: 13,
+            height: 4,
+            backgroundColor: '#38BDF8',
+            borderRadius: 2,
+            marginTop: 2,
+            opacity: 0.75,
+          }} />
+          {/* Side Mirrors */}
+          <View style={{ position: 'absolute', top: 8, left: -3, width: 3, height: 5, backgroundColor: color, borderRadius: 1 }} />
+          <View style={{ position: 'absolute', top: 8, right: -3, width: 3, height: 5, backgroundColor: color, borderRadius: 1 }} />
+        </View>
+      )}
+    </View>
+  );
+};
+
 export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation }) => {
   const { colors, isDark } = useTheme();
   const [selectedRide, setSelectedRide] = useState('2');
@@ -853,7 +934,6 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
 
             {mockDrivers.map((driver) => {
               const driverColor = driver.colorName === 'rideBlue' ? colors.rideBlue : driver.colorName === 'foodOrange' ? colors.foodOrange : colors.primary;
-              const auraBg = driver.colorName === 'rideBlue' ? colors.rideBlueLight : driver.colorName === 'foodOrange' ? colors.foodOrangeLight : colors.primaryLight;
               return (
                 <Marker
                   key={driver.id}
@@ -862,14 +942,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                   anchor={{ x: 0.5, y: 0.5 }}
                   flat={true}
                 >
-                  <View style={styles.driverMarkerContainer}>
-                    {/* Glowing Aura Ring */}
-                    <View style={[styles.driverAuraRing, { backgroundColor: auraBg }]} />
-                    {/* Glossy Circular Badge */}
-                    <View style={[styles.driverBadge, { backgroundColor: colors.surface, borderColor: driverColor }]}>
-                      <Icon name={driver.icon} set={driver.set || 'material'} size={18} color={driverColor} />
-                    </View>
-                  </View>
+                  <TopDownCarMarker type={driver.type} color={driverColor} isDark={isDark} />
                 </Marker>
               );
             })}
