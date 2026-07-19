@@ -401,31 +401,72 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
     longitude: -0.1691,
   });
   const [destinationCoords, setDestinationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [mockDrivers, setMockDrivers] = useState<{ id: string; latitude: number; longitude: number; rotation: number }[]>([]);
+  const [mockDrivers, setMockDrivers] = useState<{ id: string; type: string; icon: string; set: any; colorName: string; latitude: number; longitude: number; rotation: number }[]>([]);
 
   useEffect(() => {
     if (pickupCoords) {
-      const drivers = [
+      const initialDrivers = [
         {
           id: 'driver_1',
-          latitude: pickupCoords.latitude + 0.002,
-          longitude: pickupCoords.longitude + 0.003,
+          type: 'GoStandard',
+          icon: 'car-sports',
+          set: 'material',
+          colorName: 'primary',
+          latitude: pickupCoords.latitude + 0.0022,
+          longitude: pickupCoords.longitude + 0.0031,
           rotation: 45,
         },
         {
           id: 'driver_2',
-          latitude: pickupCoords.latitude - 0.002,
-          longitude: pickupCoords.longitude - 0.003,
-          rotation: 120,
+          type: 'GoComfort',
+          icon: 'car-side',
+          set: 'material-community',
+          colorName: 'rideBlue',
+          latitude: pickupCoords.latitude - 0.0018,
+          longitude: pickupCoords.longitude - 0.0028,
+          rotation: 135,
         },
         {
           id: 'driver_3',
-          latitude: pickupCoords.latitude + 0.004,
-          longitude: pickupCoords.longitude - 0.002,
-          rotation: 290,
+          type: 'GoBiker',
+          icon: 'motorbike',
+          set: 'material',
+          colorName: 'foodOrange',
+          latitude: pickupCoords.latitude + 0.0035,
+          longitude: pickupCoords.longitude - 0.0021,
+          rotation: 270,
+        },
+        {
+          id: 'driver_4',
+          type: 'GoPool',
+          icon: 'car-hatchback',
+          set: 'material',
+          colorName: 'primary',
+          latitude: pickupCoords.latitude - 0.0029,
+          longitude: pickupCoords.longitude + 0.0025,
+          rotation: 210,
         },
       ];
-      setMockDrivers(drivers);
+      setMockDrivers(initialDrivers);
+
+      // Live vehicle movement simulation (nudge coordinates & smooth angle turn)
+      const interval = setInterval(() => {
+        setMockDrivers(prevDrivers =>
+          prevDrivers.map(driver => {
+            const latNudge = (Math.random() - 0.48) * 0.0004;
+            const lngNudge = (Math.random() - 0.48) * 0.0004;
+            const angleNudge = (Math.random() - 0.5) * 20;
+            return {
+              ...driver,
+              latitude: driver.latitude + latNudge,
+              longitude: driver.longitude + lngNudge,
+              rotation: Math.round((driver.rotation + angleNudge + 360) % 360),
+            };
+          })
+        );
+      }, 2500);
+
+      return () => clearInterval(interval);
     }
   }, [pickupCoords]);
 
@@ -810,29 +851,28 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
               />
             )}
 
-            {mockDrivers.map((driver) => (
-              <Marker
-                key={driver.id}
-                coordinate={{ latitude: driver.latitude, longitude: driver.longitude }}
-                rotation={driver.rotation}
-                anchor={{ x: 0.5, y: 0.5 }}
-              >
-                <View style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: 20,
-                  padding: 6,
-                  borderWidth: 1.5,
-                  borderColor: colors.primary,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 2,
-                  elevation: 2,
-                }}>
-                  <Icon name="car-sports" set="material" size={16} color={colors.primary} />
-                </View>
-              </Marker>
-            ))}
+            {mockDrivers.map((driver) => {
+              const driverColor = driver.colorName === 'rideBlue' ? colors.rideBlue : driver.colorName === 'foodOrange' ? colors.foodOrange : colors.primary;
+              const auraBg = driver.colorName === 'rideBlue' ? colors.rideBlueLight : driver.colorName === 'foodOrange' ? colors.foodOrangeLight : colors.primaryLight;
+              return (
+                <Marker
+                  key={driver.id}
+                  coordinate={{ latitude: driver.latitude, longitude: driver.longitude }}
+                  rotation={driver.rotation}
+                  anchor={{ x: 0.5, y: 0.5 }}
+                  flat={true}
+                >
+                  <View style={styles.driverMarkerContainer}>
+                    {/* Glowing Aura Ring */}
+                    <View style={[styles.driverAuraRing, { backgroundColor: auraBg }]} />
+                    {/* Glossy Circular Badge */}
+                    <View style={[styles.driverBadge, { backgroundColor: colors.surface, borderColor: driverColor }]}>
+                      <Icon name={driver.icon} set={driver.set || 'material'} size={18} color={driverColor} />
+                    </View>
+                  </View>
+                </Marker>
+              );
+            })}
           </MapView>
         </View>
 
@@ -1569,4 +1609,33 @@ const styles = StyleSheet.create({
   },
   destBubbleText: { fontSize: 10, fontWeight: '700' },
   destPinDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: '#FFFFFF' },
+
+  // Polished Vehicle Driver Marker Styling
+  driverMarkerContainer: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  driverAuraRing: {
+    position: 'absolute',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    opacity: 0.6,
+  },
+  driverBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
 });
