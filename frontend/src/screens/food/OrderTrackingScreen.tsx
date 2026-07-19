@@ -151,35 +151,31 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
       }
     });
 
-    // Offline mock fallback mode loop or Periodic HTTP Polling backup
+    // Automated Demo Food Delivery Progression (step-by-step to 100% Delivered)
     let fallbackTimer: NodeJS.Timeout;
+    const runDemoProgressLoop = () => {
+      fallbackTimer = setTimeout(() => {
+        if (!isMounted) return;
+        setCurrentStep((prev) => {
+          if (prev < steps.length - 1) {
+            const nextStep = prev + 1;
+            scheduleLocalNotification(
+              'GoBite Food Update 🍔',
+              `Order status: ${steps[nextStep]?.title || 'Food Status Updated'}`,
+              { orderId: route.params?.orderId || 'ORD001', status: steps[nextStep]?.title }
+            );
+            runDemoProgressLoop();
+            return nextStep;
+          }
+          return prev;
+        });
+      }, 4000);
+    };
+    runDemoProgressLoop();
+
     const targetOrderId = route.params?.orderId;
-    const isMockOrder = !targetOrderId || 
-                        String(targetOrderId).startsWith('ORD') || 
-                        String(targetOrderId).startsWith('GFT');
-    
-    if (isMockOrder) {
-      console.log('Running in offline mock mode order tracking fallback loop.');
-      const runOfflineLoop = () => {
-        fallbackTimer = setTimeout(() => {
-          setCurrentStep((prev) => {
-            if (prev < steps.length - 1) {
-              const nextStep = prev + 1;
-              scheduleLocalNotification(
-                'GoBite Order Status (Offline)',
-                `Your order from ${route.params?.restaurantName || 'GoBite Restaurant'} is now: ${steps[nextStep]?.title}`,
-                { orderId: 'ORD001', status: steps[nextStep]?.title }
-              );
-              runOfflineLoop();
-              return nextStep;
-            }
-            return prev;
-          });
-        }, 3500);
-      };
-      runOfflineLoop();
-    } else {
-      // Backend HTTP polling backup every 3s
+    if (targetOrderId && !String(targetOrderId).startsWith('ORD') && !String(targetOrderId).startsWith('GFT')) {
+      // Backend HTTP polling backup
       pollInterval = setInterval(async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/orders/${targetOrderId}`);

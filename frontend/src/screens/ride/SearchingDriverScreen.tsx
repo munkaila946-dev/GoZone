@@ -201,9 +201,34 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
         
         const json = await response.json();
         console.log('Backend ride booking initiated successfully:', json);
+        const bookedId = (json.success && json.data) ? json.data.id : 9999;
         if (json.success && json.data) {
           setRideId(json.data.id);
         }
+
+        // Demo Simulation Auto-Accept Timer (after 4s auto-accepts & opens RideInProgress)
+        fallbackTimerRef.current = setTimeout(() => {
+          if (isMounted) {
+            scheduleLocalNotification(
+              'GoRide Driver Found!',
+              'Kwame Asante (GW-4921-23) has accepted your ride request and is en route.',
+              { rideId: bookedId, status: 'ACCEPTED' }
+            );
+
+            navigation.navigate('RideInProgress', {
+              rideId: bookedId,
+              rideType: params.rideType,
+              price: params.price,
+              driverName: 'Kwame Asante',
+              vehicleModel: 'Toyota Vitz • Silver',
+              licensePlate: 'GW-4921-23',
+              pickup: params.pickup,
+              destination: params.destination,
+              pickupCoords: params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 },
+              destinationCoords: params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 }
+            });
+          }
+        }, 4000);
       } catch (err) {
         console.warn('Backend ride booking failed (offline mode). Falling back to mock simulation.', err);
         
@@ -211,23 +236,25 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
         fallbackTimerRef.current = setTimeout(() => {
           if (isMounted) {
             scheduleLocalNotification(
-              'GoRide Booked! (Offline)',
-              'Kwame Asante (Mock) has accepted your ride request and is heading your way.',
+              'GoRide Driver Found! (Demo)',
+              'Kwame Asante (GW-4921-23) has accepted your ride request and is heading your way.',
               { rideId: 9999, status: 'ACCEPTED' }
             );
 
             navigation.navigate('RideInProgress', {
-              rideId: 9999, // Mock ID
+              rideId: 9999,
               rideType: params.rideType,
               price: params.price,
-              driverName: 'Kwame Asante (Mock)',
+              driverName: 'Kwame Asante',
+              vehicleModel: 'Toyota Vitz • Silver',
+              licensePlate: 'GW-4921-23',
               pickup: params.pickup,
               destination: params.destination,
               pickupCoords: params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 },
               destinationCoords: params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 }
             });
           }
-        }, 4500);
+        }, 4000);
       }
     };
 

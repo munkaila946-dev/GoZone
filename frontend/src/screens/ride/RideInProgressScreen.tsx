@@ -211,49 +211,50 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
       }
     });
 
-    // Offline mock fallback mode loop or Backend HTTP polling backup
+    // Automated Demo Simulation Loop (moves driver car along route and completes trip)
     let fallbackTimer1: NodeJS.Timeout;
     let fallbackTimer2: NodeJS.Timeout;
     let fallbackAnimFrame: number;
     
-    if (params.rideId === 9999) {
-      console.log('Running in offline mock mode fallback loop.');
-      fallbackTimer1 = setTimeout(() => {
-        setRideStage('inProgress');
-        scheduleLocalNotification(
-          'On the trip (Offline)',
-          'Your trip has started. Heading to your destination.',
-          { rideId: 9999, status: 'IN_PROGRESS' }
-        );
-      }, 6000);
-      fallbackTimer2 = setTimeout(() => {
-        setRideStage('completed');
-        scheduleLocalNotification(
-          'Trip Completed (Offline)',
-          `You have arrived at your destination! GH₵${params.price || '15.00'} has been deducted.`,
-          { rideId: 9999, status: 'COMPLETED' }
-        );
-      }, 12000);
+    // Always run animated trip progression for demo app responsiveness
+    fallbackTimer1 = setTimeout(() => {
+      setRideStage('inProgress');
+      scheduleLocalNotification(
+        'On the Trip 🚗',
+        `Kwame Asante has picked you up. Heading to ${params.destination || 'destination'}.`,
+        { rideId: params.rideId || 9999, status: 'IN_PROGRESS' }
+      );
+    }, 5000);
 
-      const startTime = Date.now();
-      const duration = 12000;
-      const animateFallback = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const startCoords = params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 };
-        const endCoords = params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 };
+    fallbackTimer2 = setTimeout(() => {
+      setRideStage('completed');
+      scheduleLocalNotification(
+        'Arrived at Destination! 🎉',
+        `You have arrived at ${params.destination || 'destination'}. GH₵${params.price || 25} paid via SuperWallet.`,
+        { rideId: params.rideId || 9999, status: 'COMPLETED' }
+      );
+    }, 13000);
 
-        const currentLat = startCoords.latitude + (endCoords.latitude - startCoords.latitude) * progress;
-        const currentLng = startCoords.longitude + (endCoords.longitude - startCoords.longitude) * progress;
-        setCarCoord({ latitude: currentLat, longitude: currentLng });
+    const startTime = Date.now();
+    const duration = 13000;
+    const animateFallback = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const startCoords = params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 };
+      const endCoords = params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 };
 
-        if (progress < 1) {
-          fallbackAnimFrame = requestAnimationFrame(animateFallback);
-        }
-      };
-      animateFallback();
-    } else {
-      // Backend HTTP polling backup every 2.5s
+      const currentLat = startCoords.latitude + (endCoords.latitude - startCoords.latitude) * progress;
+      const currentLng = startCoords.longitude + (endCoords.longitude - startCoords.longitude) * progress;
+      setCarCoord({ latitude: currentLat, longitude: currentLng });
+
+      if (progress < 1) {
+        fallbackAnimFrame = requestAnimationFrame(animateFallback);
+      }
+    };
+    animateFallback();
+
+    if (params.rideId && params.rideId !== 9999) {
+      // Optional HTTP Polling backup
       pollInterval = setInterval(async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/rides/${params.rideId}`);
@@ -266,7 +267,7 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
         } catch (err) {
           // Silent fallback
         }
-      }, 2500);
+      }, 3000);
     }
 
     return () => {
