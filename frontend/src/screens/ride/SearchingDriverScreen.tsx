@@ -165,7 +165,31 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
       }
     });
 
-    // Fire HTTP POST request to backend API to request a ride
+    // Guaranteed Demo Simulation Timer (starts immediately on mount, 3.5 seconds)
+    fallbackTimerRef.current = setTimeout(() => {
+      if (isMounted) {
+        scheduleLocalNotification(
+          'GoRide Driver Found! 🚗',
+          'Kwame Asante (GW-4921-23) has accepted your ride request and is en route.',
+          { rideId: 9999, status: 'ACCEPTED' }
+        );
+
+        navigation.navigate('RideInProgress', {
+          rideId: 9999,
+          rideType: params.rideType || 'Standard',
+          price: params.price || 25,
+          driverName: 'Kwame Asante',
+          vehicleModel: 'Toyota Vitz • Silver',
+          licensePlate: 'GW-4921-23',
+          pickup: params.pickup || 'Accra Mall',
+          destination: params.destination || 'Kotoka Airport',
+          pickupCoords: params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 },
+          destinationCoords: params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 }
+        });
+      }
+    }, 3500);
+
+    // Fire non-blocking HTTP POST request to backend API to register ride in DB
     const bookRideOnBackend = async () => {
       const typeMap: Record<string, string> = {
         'GoPool': 'GO_POOL',
@@ -183,11 +207,11 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
           },
           body: JSON.stringify({
             rideType: backendType,
-            fare: params.price,
-            pickupAddress: params.pickup,
+            fare: params.price || 25,
+            pickupAddress: params.pickup || 'Accra Mall',
             pickupLatitude: params.pickupCoords?.latitude || 5.6037,
             pickupLongitude: params.pickupCoords?.longitude || -0.1870,
-            destinationAddress: params.destination,
+            destinationAddress: params.destination || 'Kotoka Airport',
             destLatitude: params.destinationCoords?.latitude || 5.6150,
             destLongitude: params.destinationCoords?.longitude || -0.1700,
             distanceKm: 3.2,
@@ -195,66 +219,12 @@ export const SearchingDriverScreen: React.FC<SearchingDriverScreenProps> = ({
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.ok) {
+          const json = await response.json();
+          console.log('Backend ride booking registered successfully:', json);
         }
-        
-        const json = await response.json();
-        console.log('Backend ride booking initiated successfully:', json);
-        const bookedId = (json.success && json.data) ? json.data.id : 9999;
-        if (json.success && json.data) {
-          setRideId(json.data.id);
-        }
-
-        // Demo Simulation Auto-Accept Timer (after 4s auto-accepts & opens RideInProgress)
-        fallbackTimerRef.current = setTimeout(() => {
-          if (isMounted) {
-            scheduleLocalNotification(
-              'GoRide Driver Found!',
-              'Kwame Asante (GW-4921-23) has accepted your ride request and is en route.',
-              { rideId: bookedId, status: 'ACCEPTED' }
-            );
-
-            navigation.navigate('RideInProgress', {
-              rideId: bookedId,
-              rideType: params.rideType,
-              price: params.price,
-              driverName: 'Kwame Asante',
-              vehicleModel: 'Toyota Vitz • Silver',
-              licensePlate: 'GW-4921-23',
-              pickup: params.pickup,
-              destination: params.destination,
-              pickupCoords: params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 },
-              destinationCoords: params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 }
-            });
-          }
-        }, 4000);
       } catch (err) {
-        console.warn('Backend ride booking failed (offline mode). Falling back to mock simulation.', err);
-        
-        // Offline Fallback local timer
-        fallbackTimerRef.current = setTimeout(() => {
-          if (isMounted) {
-            scheduleLocalNotification(
-              'GoRide Driver Found! (Demo)',
-              'Kwame Asante (GW-4921-23) has accepted your ride request and is heading your way.',
-              { rideId: 9999, status: 'ACCEPTED' }
-            );
-
-            navigation.navigate('RideInProgress', {
-              rideId: 9999,
-              rideType: params.rideType,
-              price: params.price,
-              driverName: 'Kwame Asante',
-              vehicleModel: 'Toyota Vitz • Silver',
-              licensePlate: 'GW-4921-23',
-              pickup: params.pickup,
-              destination: params.destination,
-              pickupCoords: params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 },
-              destinationCoords: params.destinationCoords || { latitude: 5.6150, longitude: -0.1700 }
-            });
-          }
-        }, 4000);
+        console.warn('Backend ride booking silent warning:', err);
       }
     };
 

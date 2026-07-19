@@ -1302,55 +1302,14 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                     }
 
                     const dest = destination;
-                    if (selectedOption?.type !== 'GoPool') {
-                      Alert.alert(
-                        "Riders Nearby! 🚗",
-                        `Ama (0.2 km away) is also requesting a ride to ${dest}. Would you like to share the ride and save 40% on your fare? (Pay GH₵15.00 instead of GH₵${selectedOption?.price})`,
-                        [
-                          {
-                            text: "🤝 Share Ride & Save",
-                            onPress: () => {
-                              setSelectedRide('1'); // Switch to GoPool
-                              (navigation as any).navigate('SearchingDriver', {
-                                pickup,
-                                destination: dest,
-                                rideType: 'GoPool',
-                                price: 15,
-                                pickupCoords: finalPickupCoords,
-                                destinationCoords: finalDestCoords,
-                              });
-                            }
-                          },
-                          {
-                            text: "👤 Go Solo",
-                            onPress: () => {
-                              (navigation as any).navigate('SearchingDriver', {
-                                pickup,
-                                destination: dest,
-                                rideType: selectedOption?.type ?? 'Standard',
-                                price: selectedOption?.price ?? 25,
-                                pickupCoords: finalPickupCoords,
-                                destinationCoords: finalDestCoords,
-                              });
-                            }
-                          },
-                          {
-                            text: "Cancel",
-                            style: "cancel"
-                          }
-                        ],
-                        { cancelable: true }
-                      );
-                    } else {
-                      (navigation as any).navigate('SearchingDriver', {
-                        pickup,
-                        destination: dest,
-                        rideType: 'GoPool',
-                        price: 15,
-                        pickupCoords: finalPickupCoords,
-                        destinationCoords: finalDestCoords,
-                      });
-                    }
+                    (navigation as any).navigate('SearchingDriver', {
+                      pickup: pickup || 'Accra Mall',
+                      destination: dest || 'Kotoka Airport',
+                      rideType: selectedOption?.type ?? 'Standard',
+                      price: selectedOption?.price ?? 25,
+                      pickupCoords: finalPickupCoords,
+                      destinationCoords: finalDestCoords,
+                    });
                   }}
                   activeOpacity={0.95}
                 >
