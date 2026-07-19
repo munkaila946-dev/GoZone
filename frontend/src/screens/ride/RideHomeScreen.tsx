@@ -879,7 +879,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             {/* If no destination set yet, show exact Bolt Home Screenshot layout (3 Service Grid Cards + Large Where To search + Recent Places) */}
             {!destination && !activeField ? (
               <>
-                {/* 3 Top Service Cards (Rides, Bolt Food, Bolt Send) */}
+                {/* 3 Top GoZone Service Cards (GoRide, GoBite, GoSend) */}
                 <View style={styles.boltServiceGrid}>
                   <TouchableOpacity 
                     style={[styles.boltServiceCard, { backgroundColor: colors.surfaceAlt, borderColor: colors.primary, borderWidth: 1.5 }]}
@@ -889,8 +889,8 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                     <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.primaryLight }]}>
                       <Icon name="car-sports" set="material" size={26} color={colors.primary} />
                     </View>
-                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Rides</Text>
-                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Let's get moving</Text>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>GoRide</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Fast, reliable rides</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -901,20 +901,20 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                     <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.foodOrangeLight }]}>
                       <Icon name="hamburger" set="material" size={26} color={colors.foodOrange} />
                     </View>
-                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Bolt Food</Text>
-                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Quick delivery</Text>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>GoBite</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Food delivery</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={[styles.boltServiceCard, { backgroundColor: colors.surfaceAlt }]}
-                    onPress={() => Alert.alert('Bolt Send 📦', 'GoZone Express Delivery: Send packages safely across town!')}
+                    onPress={() => Alert.alert('GoSend 📦', 'GoZone Express Courier: Send & receive packages across town fast!')}
                     activeOpacity={0.85}
                   >
                     <View style={[styles.boltServiceIconWrap, { backgroundColor: colors.rideBlueLight }]}>
                       <Icon name="package-variant-closed" set="material" size={26} color={colors.rideBlue} />
                     </View>
-                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>Bolt Send</Text>
-                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Send or receive</Text>
+                    <Text style={[styles.boltServiceTitle, { color: colors.textPrimary }]}>GoSend</Text>
+                    <Text style={[styles.boltServiceSub, { color: colors.textTertiary }]}>Parcel courier</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -931,61 +931,61 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                   <Text style={[styles.boltWhereToText, { color: colors.textPrimary }]}>Where to?</Text>
                 </TouchableOpacity>
 
-                {/* Exact Screenshot Recent Places List */}
+                {/* GoZone Recent Places List */}
                 <View style={styles.boltRecentList}>
-                  <TouchableOpacity
-                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
-                    onPress={() => handleQuickChipPress('Trinity Oil')}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
-                      <Icon name="clock" set="feather" size={16} color={colors.textSecondary} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Trinity Oil - petroleum gas station</Text>
-                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
-                    onPress={() => handleQuickChipPress('Atta-Mills')}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
-                      <Icon name="clock" set="feather" size={16} color={colors.textSecondary} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Atta-Mills Junction 9</Text>
-                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
-                    onPress={() => handleQuickChipPress('Tech Junction')}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
-                      <Icon name="bus" set="feather" size={16} color={colors.textSecondary} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Tech Junction</Text>
-                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Kumasi</Text>
-                    </View>
-                  </TouchableOpacity>
-
                   <TouchableOpacity
                     style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
                     onPress={() => handleQuickChipPress('East Legon')}
                     activeOpacity={0.7}
                   >
                     <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
-                      <Icon name="home" set="feather" size={16} color={colors.textSecondary} />
+                      <Icon name="home" set="feather" size={16} color={colors.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>East Legon</Text>
-                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Accra</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Accra, Ghana</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Accra Mall')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="shopping-bag" set="feather" size={16} color={colors.foodOrange} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Accra Mall, Teshie Rd</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Spintex, Accra</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Kotoka International')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="navigation" set="feather" size={16} color={colors.rideBlue} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Kotoka International Airport (ACC)</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Airport Rd, Accra</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.boltRecentItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleQuickChipPress('Oxford Street')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.boltRecentIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                      <Icon name="clock" set="feather" size={16} color={colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boltRecentTitle, { color: colors.textPrimary }]}>Osu Oxford Street</Text>
+                      <Text style={[styles.boltRecentSub, { color: colors.textTertiary }]}>Osu, Accra</Text>
                     </View>
                   </TouchableOpacity>
                 </View>
