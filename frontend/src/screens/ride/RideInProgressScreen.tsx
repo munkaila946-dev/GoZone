@@ -228,6 +228,21 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
 
     fallbackTimer2 = setTimeout(() => {
       setRideStage('completed');
+      
+      // Deduct ride fare from SuperWallet balance on trip completion
+      const currentBalance = useUserStore.getState().balance;
+      const finalBalance = currentBalance - (params.price || 25);
+      useUserStore.getState().setBalance(finalBalance);
+      useUserStore.getState().addTransaction({
+        id: 't_' + Date.now(),
+        type: 'debit',
+        category: 'ride',
+        amount: params.price || 25,
+        description: `Ride to ${params.destination || 'destination'}`,
+        date: new Date().toISOString(),
+        status: 'completed',
+      });
+
       scheduleLocalNotification(
         'Arrived at Destination! 🎉',
         `You have arrived at ${params.destination || 'destination'}. GH₵${params.price || 25} paid via SuperWallet.`,

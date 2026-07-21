@@ -195,6 +195,19 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
     } catch (error: any) {
       console.warn('Backend order placement failed (offline simulator mode):', error);
       
+      // Update local wallet balance & transaction history in offline fallback mode
+      const newBalance = balance - bodyPayload.total;
+      useUserStore.getState().setBalance(newBalance);
+      useUserStore.getState().addTransaction({
+        id: 't_' + Date.now(),
+        type: 'debit',
+        category: 'food',
+        amount: bodyPayload.total,
+        description: `Order from ${routeRestaurantName || 'GoBite Restaurant'}`,
+        date: new Date().toISOString(),
+        status: 'completed',
+      });
+
       const simulatedOrderId = 'ORD' + Math.floor(1000 + Math.random() * 9000);
       navigation.navigate('OrderTracking', {
         orderId: simulatedOrderId,
