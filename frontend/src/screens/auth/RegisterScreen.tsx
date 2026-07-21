@@ -86,11 +86,23 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
   };
 
   const handleRegister = () => {
-    if (!fullName.trim() || !isPhoneValid()) return;
-    if (!password || password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters.');
+    if (!fullName.trim()) {
+      Alert.alert('Required Field', 'Please enter your full name.');
       return;
     }
+    if (!isPhoneValid()) {
+      Alert.alert('Invalid Phone', 'Please enter a valid 9-digit Ghanaian phone number (e.g. 24 123 4567).');
+      return;
+    }
+    if (!password || password.length < 6) {
+      Alert.alert('Password Required', 'Password must be at least 6 characters.');
+      return;
+    }
+    if (!agreeToTerms) {
+      Alert.alert('Terms & Privacy', 'Please accept the Terms of Service & Privacy Policy to create your account.');
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);

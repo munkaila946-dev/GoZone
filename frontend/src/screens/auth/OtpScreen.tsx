@@ -129,7 +129,20 @@ export const OtpScreen: React.FC<OtpScreenProps> = ({ navigation, route, onLogin
           onLogin();
         } catch (error: any) {
           setLoading(false);
-          Alert.alert('Registration Failed', error.message || 'Could not complete registration on backend.');
+          Alert.alert(
+            'Registration Options',
+            'Unable to connect to backend server. Would you like to enter Demo Mode with preloaded wallet balance (GH₵ 1,250)?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: '🚀 Enter Demo Mode',
+                onPress: () => {
+                  setAuth('demo-token-reg', 99, registerData.name, registerData.email, registerData.phone, 1250.0);
+                  onLogin();
+                }
+              }
+            ]
+          );
           setCode('');
         }
       } else if (loginData) {
