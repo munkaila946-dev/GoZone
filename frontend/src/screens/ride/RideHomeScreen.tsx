@@ -875,15 +875,7 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
             style={styles.backButtonPos}
           />
 
-          {/* My Location Button */}
-          <MapActionButton
-            onPress={handleLocateUser}
-            iconName="crosshairs-gps"
-            iconSet="material"
-            colors={colors}
-            color={colors.primary}
-            style={styles.locateButtonPos}
-          />
+
 
           {/* Recenter Route Button */}
           {pickupCoords && destinationCoords && (
