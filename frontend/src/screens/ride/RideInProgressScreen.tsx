@@ -149,8 +149,8 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
     destinationCoords: { latitude: 5.6150, longitude: -0.1700 }
   };
 
-  // Ride states: 'arriving' -> 'inProgress' -> 'completed'
-  const [rideStage, setRideStage] = useState<'arriving' | 'inProgress' | 'completed'>('arriving');
+  // Ride states: 'arriving' -> 'pickingUpAma' -> 'inProgress' -> 'completed'
+  const [rideStage, setRideStage] = useState<'arriving' | 'pickingUpAma' | 'inProgress' | 'completed'>('arriving');
   const [carCoord, setCarCoord] = useState(params.pickupCoords || { latitude: 5.6037, longitude: -0.1870 });
   const [rating, setRating] = useState(5);
 
@@ -167,10 +167,28 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
     }).start();
   };
 
+  const isGoPool = params.rideType === 'GoPool';
   const STAGES = {
-    arriving: { title: 'Driver on the way', subtitle: 'Your driver is heading to your pickup location', eta: '3 min away' },
-    inProgress: { title: 'On the trip', subtitle: 'Enjoy the ride! Heading to your destination', eta: '12 min to arrival' },
-    completed: { title: 'Trip Completed', subtitle: 'You have arrived at your destination', eta: 'Hope you enjoyed your ride!' },
+    arriving: { 
+      title: 'Driver on the way', 
+      subtitle: isGoPool ? 'Heading to pick you up (Ama is sharing this ride)' : 'Your driver is heading to your pickup location', 
+      eta: '3 min away' 
+    },
+    pickingUpAma: {
+      title: 'Picking up Ama 🤝',
+      subtitle: 'Kwame is routing to pick up your co-rider Ama nearby',
+      eta: '2 min to co-pickup'
+    },
+    inProgress: { 
+      title: isGoPool ? 'On shared trip 👥' : 'On the trip', 
+      subtitle: isGoPool ? 'Enjoying the ride with Ama' : 'Enjoy the ride! Heading to your destination', 
+      eta: '8 min to arrival' 
+    },
+    completed: { 
+      title: isGoPool ? 'Shared Trip Completed! 🎉' : 'Trip Completed', 
+      subtitle: 'You have arrived at your destination', 
+      eta: 'Hope you enjoyed sharing your ride!' 
+    },
   };
 
   // Listen to stage updates & location updates from backend WebSockets
@@ -213,18 +231,42 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
 
     // Automated Demo Simulation Loop (moves driver car along route and completes trip)
     let fallbackTimer1: NodeJS.Timeout;
+    let fallbackTimerPool: NodeJS.Timeout;
     let fallbackTimer2: NodeJS.Timeout;
     let fallbackAnimFrame: number;
     
     // Always run animated trip progression for demo app responsiveness
-    fallbackTimer1 = setTimeout(() => {
-      setRideStage('inProgress');
-      scheduleLocalNotification(
-        'On the Trip 🚗',
-        `Kwame Asante has picked you up. Heading to ${params.destination || 'destination'}.`,
-        { rideId: params.rideId || 9999, status: 'IN_PROGRESS' }
-      );
-    }, 5000);
+    if (params.rideType === 'GoPool') {
+      // 1. Pick you up first and show route to co-rider Ama
+      fallbackTimer1 = setTimeout(() => {
+        setRideStage('pickingUpAma');
+        scheduleLocalNotification(
+          'On the Trip 🤝',
+          'Kwame Asante has picked you up. Next stop: Picking up co-rider Ama.',
+          { rideId: params.rideId || 9999, status: 'IN_PROGRESS' }
+        );
+      }, 4000);
+
+      // 2. Pick up Ama and merge path to destinations
+      fallbackTimerPool = setTimeout(() => {
+        setRideStage('inProgress');
+        scheduleLocalNotification(
+          'Ama Boarded 👥',
+          'Ama has boarded the ride. Enjoy your shared trip!',
+          { rideId: params.rideId || 9999, status: 'IN_PROGRESS' }
+        );
+      }, 8000);
+    } else {
+      // Standard Solo Ride progression
+      fallbackTimer1 = setTimeout(() => {
+        setRideStage('inProgress');
+        scheduleLocalNotification(
+          'On the Trip 🚗',
+          `Kwame Asante has picked you up. Heading to ${params.destination || 'destination'}.`,
+          { rideId: params.rideId || 9999, status: 'IN_PROGRESS' }
+        );
+      }, 5000);
+    }
 
     fallbackTimer2 = setTimeout(() => {
       setRideStage('completed');
@@ -238,7 +280,7 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
         type: 'debit',
         category: 'ride',
         amount: params.price || 25,
-        description: `Ride to ${params.destination || 'destination'}`,
+        description: `Shared Ride to ${params.destination || 'destination'}`,
         date: new Date().toISOString(),
         status: 'completed',
       });
@@ -289,6 +331,7 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
       if (unsubscribeStatus) unsubscribeStatus();
       if (unsubscribeLocation) unsubscribeLocation();
       if (fallbackTimer1) clearTimeout(fallbackTimer1);
+      if (fallbackTimerPool) clearTimeout(fallbackTimerPool);
       if (fallbackTimer2) clearTimeout(fallbackTimer2);
       if (fallbackAnimFrame) cancelAnimationFrame(fallbackAnimFrame);
       if (pollInterval) clearInterval(pollInterval);
