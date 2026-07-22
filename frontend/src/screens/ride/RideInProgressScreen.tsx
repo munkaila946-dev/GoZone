@@ -18,7 +18,7 @@ import { useTheme } from '@hooks/useTheme';
 import { typography, spacing, borderRadius, shadows, DARK_MAP_STYLE } from '@theme/index';
 import { Icon, Button, type IconSet } from '@components/index';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import { useSocketStore } from '@store/index';
+import { useSocketStore, useUserStore } from '@store/index';
 import { scheduleLocalNotification } from '../../services/notificationManager';
 
 const RideActionButton = ({

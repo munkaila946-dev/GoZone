@@ -15,6 +15,7 @@ import {
   Platform,
   PanResponder,
   Animated,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@hooks/useTheme';
@@ -364,6 +365,13 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
   const [destination, setDestination] = useState('');
   const [places, setPlaces] = useState<any[]>(GHANA_PLACES);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [tempBookingCoords, setTempBookingCoords] = useState<{
+    pickup: string;
+    destination: string;
+    pickupCoords: any;
+    destinationCoords: any;
+  } | null>(null);
 
   const sheetTranslateY = useRef(new Animated.Value(0)).current;
   const lastOffsetRef = useRef(0);
@@ -1302,14 +1310,21 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
                     }
 
                     const dest = destination;
-                    (navigation as any).navigate('SearchingDriver', {
+                    const bookingParams = {
                       pickup: pickup || 'Accra Mall',
                       destination: dest || 'Kotoka Airport',
                       rideType: selectedOption?.type ?? 'Standard',
                       price: selectedOption?.price ?? 25,
                       pickupCoords: finalPickupCoords,
                       destinationCoords: finalDestCoords,
-                    });
+                    };
+
+                    if (selectedOption?.type !== 'GoPool') {
+                      setTempBookingCoords(bookingParams);
+                      setShowShareModal(true);
+                    } else {
+                      (navigation as any).navigate('SearchingDriver', bookingParams);
+                    }
                   }}
                   activeOpacity={0.95}
                 >
@@ -1333,6 +1348,95 @@ export const RideHomeScreen: React.FC<TabScreenProps<'Ride'>> = ({ navigation })
       </Animated.View>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      {/* ===== Custom Solo vs. Share Option Modal ===== */}
+      <Modal
+        visible={showShareModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowShareModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={styles.modalBgTouch} 
+            activeOpacity={1} 
+            onPress={() => setShowShareModal(false)} 
+          />
+          <View style={[styles.modalSheet, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Choose Ride Preference</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.textTertiary }]}>
+              Save money by sharing your ride with nearby commuters heading your way!
+            </Text>
+
+            {/* Option 1: Go Solo (Full price) */}
+            <TouchableOpacity
+              style={[styles.optionCard, { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 }]}
+              onPress={() => {
+                setShowShareModal(false);
+                if (tempBookingCoords) {
+                  (navigation as any).navigate('SearchingDriver', tempBookingCoords);
+                }
+              }}
+              activeOpacity={0.85}
+            >
+              <View style={[styles.optionIconWrap, { backgroundColor: colors.primaryLight }]}>
+                <Icon name="user" set="feather" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.optionInfo}>
+                <Text style={[styles.optionName, { color: colors.textPrimary }]}>👤 Go Solo (Private)</Text>
+                <Text style={[styles.optionDesc, { color: colors.textTertiary }]}>Fastest pickup. Private, single trip.</Text>
+              </View>
+              <Text style={[styles.optionPrice, { color: colors.textPrimary }]}>
+                GH₵{tempBookingCoords?.price ?? 25}.00
+              </Text>
+            </TouchableOpacity>
+
+            {/* Option 2: Share Ride (Reduced price - GoPool) */}
+            <TouchableOpacity
+              style={[styles.optionCard, { backgroundColor: colors.surfaceAlt, borderColor: colors.primary, borderWidth: 1.5 }]}
+              onPress={() => {
+                setShowShareModal(false);
+                if (tempBookingCoords) {
+                  (navigation as any).navigate('SearchingDriver', {
+                    ...tempBookingCoords,
+                    rideType: 'GoPool',
+                    price: 15,
+                  });
+                }
+              }}
+              activeOpacity={0.85}
+            >
+              <View style={[styles.optionIconWrap, { backgroundColor: colors.foodOrangeLight }]}>
+                <Icon name="users" set="feather" size={18} color={colors.foodOrange} />
+              </View>
+              <View style={styles.optionInfo}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={[styles.optionName, { color: colors.textPrimary }]}>🤝 Share & Save (GoPool)</Text>
+                  <View style={[styles.discountTag, { backgroundColor: colors.foodOrange }]}>
+                    <Text style={styles.discountTagText}>-40%</Text>
+                  </View>
+                </View>
+                <Text style={[styles.optionDesc, { color: colors.textTertiary }]}>
+                  Share with Ama (0.2 km away) heading same direction.
+                </Text>
+              </View>
+              <Text style={[styles.optionPrice, { color: colors.foodOrange, fontWeight: '800' }]}>
+                GH₵15.00
+              </Text>
+            </TouchableOpacity>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              style={[styles.modalCancelBtn, { backgroundColor: colors.surfaceAlt }]}
+              onPress={() => setShowShareModal(false)}
+            >
+              <Text style={[styles.modalCancelText, { color: colors.textPrimary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -1660,5 +1764,92 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 6,
+  },
+
+  // Custom Share Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalBgTouch: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: spacing.xl,
+    paddingTop: 12,
+    paddingBottom: spacing.xl + 12,
+  },
+  modalHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalTitle: {
+    fontSize: typography.size.lg,
+    fontWeight: '800',
+    marginBottom: spacing.xs,
+  },
+  modalSubtitle: {
+    fontSize: typography.size.sm,
+    lineHeight: 18,
+    marginBottom: spacing.lg,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    marginBottom: spacing.md,
+    gap: 12,
+  },
+  optionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionInfo: {
+    flex: 1,
+  },
+  optionName: {
+    fontSize: typography.size.md,
+    fontWeight: '700',
+  },
+  optionDesc: {
+    fontSize: 11,
+    marginTop: 2,
+    lineHeight: 14,
+  },
+  optionPrice: {
+    fontSize: typography.size.md,
+    fontWeight: '800',
+  },
+  discountTag: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  discountTagText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  modalCancelBtn: {
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+  },
+  modalCancelText: {
+    fontSize: typography.size.md,
+    fontWeight: '700',
   },
 });
