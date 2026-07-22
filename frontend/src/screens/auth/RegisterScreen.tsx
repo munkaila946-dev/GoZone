@@ -107,6 +107,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     setTimeout(() => {
       setLoading(false);
       const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      console.log(`[DEV] Generated Registration OTP: ${generatedOtp}`);
       navigation.navigate('OTP', {
         phoneNumber: `+233 ${phoneNumber.trim()}`,
         otpCode: generatedOtp,

@@ -152,6 +152,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, navigation })
       }
 
       const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      console.log(`[DEV] Generated Login OTP: ${generatedOtp}`);
       navigation.navigate('OTP', {
         phoneNumber: `+233 ${phoneNumber.trim()}`,
         otpCode: generatedOtp,

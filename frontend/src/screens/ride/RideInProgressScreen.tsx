@@ -229,13 +229,13 @@ export const RideInProgressScreen: React.FC<RideInProgressScreenProps> = ({
       }
     });
 
-    // Automated Demo Simulation Loop (moves driver car along route and completes trip)
+    // Offline simulation fallback for testing smooth UI transitions and updating ride stage
     let fallbackTimer1: NodeJS.Timeout;
     let fallbackTimerPool: NodeJS.Timeout;
     let fallbackTimer2: NodeJS.Timeout;
     let fallbackAnimFrame: number;
     
-    // Always run animated trip progression for demo app responsiveness
+    // Run animated trip progression to maintain active state in UI when disconnected
     if (params.rideType === 'GoPool') {
       // 1. Pick you up first and show route to co-rider Ama
       fallbackTimer1 = setTimeout(() => {

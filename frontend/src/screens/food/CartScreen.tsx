@@ -193,9 +193,9 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
       });
 
     } catch (error: any) {
-      console.warn('Backend order placement failed (offline simulator mode):', error);
+      console.warn('Backend order placement failed (offline mode):', error);
       
-      // Update local wallet balance & transaction history in offline fallback mode
+      // Update local wallet balance & transaction history when offline
       const newBalance = balance - bodyPayload.total;
       useUserStore.getState().setBalance(newBalance);
       useUserStore.getState().addTransaction({
